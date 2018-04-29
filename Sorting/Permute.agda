@@ -5,6 +5,7 @@ open import Relation.Binary as B
   using (Rel; REL; _⇒_; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
 import Relation.Binary.PropositionalEquality as PE
 import Algebra as Alg
+import Algebra.FunctionProperties as FunP
 
 open import Data.Product using (proj₁; proj₂)
 open import Data.List using (List; []; _++_; _∷_; _∷ʳ_)
@@ -27,10 +28,6 @@ data _∼ₚ_ : Rel (List A) a where
 -- "x ≈ₚ y" means x and y are permutations, e.g. repeated swaps
 _≈ₚ_ = Star _∼ₚ_
 
--- Form a permutation from a single swap
-sing : _∼ₚ_ ⇒ _≈ₚ_
-sing x = x ◅ ε
-
 module Properties where
   private
     module LM = Alg.Monoid (Data.List.monoid A)
@@ -41,14 +38,17 @@ module Properties where
   preorder : B.Preorder _ _ _
   preorder = StarP.preorder _∼ₚ_
   open B.Preorder preorder public
-    using (isPreorder)
-    renaming ( refl to perm-refl
-             ; trans to perm-trans )
+    using (isPreorder; refl; trans)
 
   -- Cons element onto a permutation (e.g. '132'~'321' -> '4123'~'4321')
   ∷-perm : ∀ {x} → (_∷_ x) Preserves _≈ₚ_ ⟶ _≈ₚ_
   ∷-perm ε = ε
   ∷-perm (x~y ◅ y~z) = skip x~y ◅ ∷-perm y~z
+
+  -- Move an element to the front by repeated swaps
+  head-perm : ∀ i xs ys → (xs ++ i ∷ ys) ≈ₚ (i ∷ xs ++ ys)
+  head-perm i []       ys = refl
+  head-perm i (x ∷ xs) ys = ∷-perm (head-perm i xs ys) ◅◅ swap ◅ ε
 
   -- Append (snoc) element onto a swap
   ∷ʳ-swap : ∀ z → (flip _∷ʳ_ z) Preserves _∼ₚ_ ⟶ _∼ₚ_
