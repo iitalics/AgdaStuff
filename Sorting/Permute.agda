@@ -68,7 +68,7 @@ module Properties where
   ++ˡ-perm []       y~z = y~z
   ++ˡ-perm (_ ∷ xs) y~z = ∷-perm (++ˡ-perm xs y~z)
 
-  -- Append two permutations (e.g. '123/321'+'45/54' => '13245'/'32154')
+  -- Append two permutations (e.g. '123/321'+'45/54' => '12345'/'32154')
   ++-perm : _++_ Preserves₂ _≈ₚ_ ⟶ _≈ₚ_ ⟶ _≈ₚ_
   ++-perm {xs} ε      u~v = ++ˡ-perm xs u~v
   ++-perm (x~y ◅ y~z) u~v = ++ʳ-swap _ x~y ◅ ++-perm y~z u~v
