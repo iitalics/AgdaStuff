@@ -128,9 +128,6 @@ module Sorting.QuickSort
       piv ∷ (below piv l ++ above piv l)   ≈⟨ PermP.∷-perm (below++above piv l) ⟩
       (piv ∷ l) ∎
       where
-        import Algebra
-        open Algebra.Monoid (Data.List.monoid A)
-          using () renaming (assoc to ++-assoc)
         open import Relation.Binary.PreorderReasoning PermP.preorder
           using (begin_; _∎)
           renaming (_∼⟨_⟩_ to _≈⟨_⟩_)
