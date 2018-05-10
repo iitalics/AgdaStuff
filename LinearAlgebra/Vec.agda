@@ -26,10 +26,10 @@ module LinearAlgebra.Vec
   open IsSemiring scalarIsSemiring
     using ()
     renaming ( +-assoc to s+-assoc
-             ; *-assoc to s*-assoc
              ; +-identity to s+-identity
              ; *-identity to s*-identity
-             ; +-comm to s+-comm )
+             ; zero to s*-zero
+             ; distrib to s*+-distrib )
 
   -- `Vec n' is the type of n-dimensional vectors of Scalar elements
 
@@ -53,9 +53,8 @@ module LinearAlgebra.Vec
   -------------------------------------------
 
   module Properties where
-    open PE.≡-Reasoning
 
-    -- Monoid interpretation of +
+    -- Properties of +
 
     +-assoc : ∀ {n} → Associative _≡_ (_+_ {n})
     +-assoc [] [] [] = PE.refl
@@ -68,10 +67,48 @@ module LinearAlgebra.Vec
     +-identityʳ [] = PE.refl
     +-identityʳ (x ∷ v) = PE.cong₂ _∷_ (proj₂ s+-identity x) (+-identityʳ v)
 
+
+    -- Properties of _*_
+
+    *-zeroˡ : ∀ {n} (v : Vec n) → s0 * v ≡ v0
+    *-zeroˡ [] = PE.refl
+    *-zeroˡ (x ∷ v) rewrite *-zeroˡ v | proj₁ s*-zero x = PE.refl
+
+    *-zeroʳ : ∀ n (k : Scalar) → k * (v0 {n}) ≡ v0
+    *-zeroʳ zero k = PE.refl
+    *-zeroʳ (suc n) k = PE.cong₂ _∷_ (proj₂ s*-zero k) (*-zeroʳ n k)
+
+    *-identityˡ : ∀ {n} (v : Vec n) → s1 * v ≡ v
+    *-identityˡ [] = PE.refl
+    *-identityˡ (x ∷ v) = PE.cong₂ _∷_ (proj₁ s*-identity x) (*-identityˡ v)
+
+
+    -- Properties of _*_ and _+_
+
+    *+-distribˡ : ∀ {n} (k : Scalar) (v u : Vec n) → k * (v + u) ≡ (k * v) + (k * u)
+    *+-distribˡ k [] [] = PE.refl
+    *+-distribˡ k (x ∷ v) (y ∷ u) = PE.cong₂ _∷_ (proj₁ s*+-distrib k x y) (*+-distribˡ k v u)
+
+
+    -- Algebra structures
+
+    +-isSemigroup : ∀ n → IsSemigroup (_≡_ {A = Vec n}) _+_
+    +-isSemigroup n = record
+      { isEquivalence = PE.isEquivalence
+      ; assoc = +-assoc
+      ; ∙-cong = PE.cong₂ _ }
+
     +-isMonoid : ∀ n → IsMonoid (_≡_ {A = Vec n}) _+_ v0
     +-isMonoid n = record
-      { isSemigroup = record
-        { isEquivalence = PE.isEquivalence
-        ; assoc = +-assoc
-        ; ∙-cong = PE.cong₂ _ }
+      { isSemigroup = +-isSemigroup n
       ; identity = +-identityˡ , +-identityʳ }
+
+    isVectorSpaceWithoutDot : ∀ n →
+      IsVectorSpaceWithoutDot Scalar (Vec n) _s+_ _s*_ _+_ _*_ s0 s1 v0
+    isVectorSpaceWithoutDot n = record
+      { scalarIsSemiring = scalarIsSemiring
+      ; vectorIsMonoid = +-isMonoid n
+      ; *+-distribˡ = *+-distribˡ
+      ; *-identityˡ = *-identityˡ
+      ; *-zeroˡ = *-zeroˡ
+      ; *-zeroʳ = *-zeroʳ n }
