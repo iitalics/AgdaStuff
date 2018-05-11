@@ -4,6 +4,7 @@ open import Relation.Binary.PropositionalEquality as PE using (_≡_)
 open import Algebra.FunctionProperties
 open import Algebra.Structures
 
+open import LinearAlgebra
 open import LinearAlgebra.Structures
 
 open import Data.Nat using (ℕ; suc; zero)
@@ -124,9 +125,17 @@ module LinearAlgebra.Vec
       ; *-zeroˡ = *-zeroˡ
       ; *-zeroʳ = *-zeroʳ n }
 
+    vectorSpaceWithoutDot : ℕ → VectorSpaceWithoutDot c c
+    vectorSpaceWithoutDot n = record
+      { isVectorSpaceWithoutDot = isVectorSpaceWithoutDot n }
+
     isVectorSpace : ∀ n →
       IsVectorSpace Scalar (Vec n) _s+_ _s*_ _+_ _*_ _·_ s0 s1 v0
     isVectorSpace n = record
       { isVectorSpaceWithoutDot = isVectorSpaceWithoutDot n
       ; ·-zeroˡ = ·-zeroˡ
       ; ·-zeroʳ = ·-zeroʳ }
+
+    vectorSpace : ℕ → VectorSpace c c
+    vectorSpace n = record
+      { isVectorSpace = isVectorSpace n }
