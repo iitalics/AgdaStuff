@@ -94,7 +94,7 @@ module LinearAlgebra.Vec.Properties
     ; identity = +-identityˡ , +-identityʳ }
 
   isVectorSpaceWithoutDot : ∀ n →
-    IsVectorSpaceWithoutDot Scalar (Vec n) _s+_ _s*_ _+_ _*_ s0 s1 v0
+    IsVectorSpaceWithoutDot {V = Vec n} _s+_ _s*_ _+_ _*_ s0 s1 v0
   isVectorSpaceWithoutDot n = record
     { scalarIsSemiring = scalarIsSemiring
     ; vectorIsMonoid = +-isMonoid n
@@ -108,7 +108,7 @@ module LinearAlgebra.Vec.Properties
     { isVectorSpaceWithoutDot = isVectorSpaceWithoutDot n }
 
   isVectorSpace : ∀ n →
-    IsVectorSpace Scalar (Vec n) _s+_ _s*_ _+_ _*_ _·_ s0 s1 v0
+    IsVectorSpace {V = Vec n} _s+_ _s*_ _+_ _*_ _·_ s0 s1 v0
   isVectorSpace n = record
     { isVectorSpaceWithoutDot = isVectorSpaceWithoutDot n
     ; ·-zeroˡ = ·-zeroˡ

@@ -11,9 +11,9 @@ module LinearAlgebra.Structures where
 -- Vector spaces without dot product
 
 record IsVectorSpaceWithoutDot
-    {c₁ c₂} (S : Set c₁) (V : Set c₂)
-    (_s+_ _s*_ : Op₂ S) (_+_ : Op₂ V)
-    (_*_ : S → V → V)
+    {c₁ c₂} {S : Set c₁} {V : Set c₂}
+    (_s+_ _s*_ : Op₂ S)
+    (_+_ : Op₂ V) (_*_ : S → V → V)
     (s0 s1 : S) (v0 : V)
     : Set (c₁ ⊔ c₂) where
   field
@@ -42,13 +42,13 @@ record IsVectorSpaceWithoutDot
 -- Vector spaces
 
 record IsVectorSpace
-    {c₁ c₂} (S : Set c₁) (V : Set c₂)
-    (_s+_ _s*_ : Op₂ S) (_+_ : Op₂ V)
-    (_*_ : S → V → V) (_·_ : V → V → S)
+    {c₁ c₂} {S : Set c₁} {V : Set c₂}
+    (_s+_ _s*_ : Op₂ S)
+    (_+_ : Op₂ V) (_*_ : S → V → V) (_·_ : V → V → S)
     (s0 s1 : S) (v0 : V)
     : Set (c₁ ⊔ c₂) where
   field
-    isVectorSpaceWithoutDot : IsVectorSpaceWithoutDot S V _s+_ _s*_ _+_ _*_ s0 s1 v0
+    isVectorSpaceWithoutDot : IsVectorSpaceWithoutDot _s+_ _s*_ _+_ _*_ s0 s1 v0
     ·-zeroˡ : ∀ u → v0 · u ≡ s0
     ·-zeroʳ : ∀ u → u · v0 ≡ s0
 

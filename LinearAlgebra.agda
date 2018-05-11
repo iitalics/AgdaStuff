@@ -19,7 +19,7 @@ record VectorSpaceWithoutDot c₁ c₂ : Set (Level.suc (c₁ ⊔ c₂)) where
     _*_ : Scalar → Vector → Vector
     s0 s1 : Scalar
     v0 : Vector
-    isVectorSpaceWithoutDot : IsVectorSpaceWithoutDot Scalar Vector _s+_ _s*_ _+_ _*_ s0 s1 v0
+    isVectorSpaceWithoutDot : IsVectorSpaceWithoutDot _s+_ _s*_ _+_ _*_ s0 s1 v0
 
   open IsVectorSpaceWithoutDot isVectorSpaceWithoutDot public
 
@@ -35,7 +35,7 @@ record VectorSpace c₁ c₂ : Set (Level.suc (c₁ ⊔ c₂)) where
     _·_ : Vector → Vector → Scalar
     s0 s1 : Scalar
     v0 : Vector
-    isVectorSpace : IsVectorSpace Scalar Vector _s+_ _s*_ _+_ _*_ _·_ s0 s1 v0
+    isVectorSpace : IsVectorSpace _s+_ _s*_ _+_ _*_ _·_ s0 s1 v0
 
   open IsVectorSpace isVectorSpace public
 
