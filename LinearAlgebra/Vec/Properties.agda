@@ -50,10 +50,9 @@ module LinearAlgebra.Vec.Properties
   -- Properties of _*_
 
   *-zeroˡ : ∀ {n} (v : Vec n) → s0 * v ≡ v0
+  *-zeroʳ : ∀ n (k : Scalar) → k * (v0 {n}) ≡ v0
   *-zeroˡ [] = PE.refl
   *-zeroˡ (x ∷ v) = PE.cong₂ _∷_ (proj₁ s*-zero x) (*-zeroˡ v)
-
-  *-zeroʳ : ∀ n (k : Scalar) → k * (v0 {n}) ≡ v0
   *-zeroʳ zero k = PE.refl
   *-zeroʳ (suc n) k = PE.cong₂ _∷_ (proj₂ s*-zero k) (*-zeroʳ n k)
 
@@ -64,18 +63,18 @@ module LinearAlgebra.Vec.Properties
 
   -- Properties of _*_ and _+_
 
+  private
+    0+0=0 : s0 s+ s0 ≡ s0
+    0+0=0 = proj₁ s+-identity s0
+
   *+-distribˡ : ∀ {n} (k : Scalar) (v u : Vec n) → k * (v + u) ≡ (k * v) + (k * u)
   *+-distribˡ k [] [] = PE.refl
   *+-distribˡ k (x ∷ v) (y ∷ u) = PE.cong₂ _∷_ (proj₁ s*+-distrib k x y) (*+-distribˡ k v u)
 
-  0+0=0 : s0 s+ s0 ≡ s0
-  0+0=0 = proj₁ s+-identity s0
-
   ·-zeroˡ : ∀ {n} (v : Vec n) → v0 · v ≡ s0
+  ·-zeroʳ : ∀ {n} (v : Vec n) → v · v0 ≡ s0
   ·-zeroˡ [] = PE.refl
   ·-zeroˡ (x ∷ v) rewrite proj₁ s*-zero x | ·-zeroˡ v = 0+0=0
-
-  ·-zeroʳ : ∀ {n} (v : Vec n) → v · v0 ≡ s0
   ·-zeroʳ [] = PE.refl
   ·-zeroʳ (x ∷ v) rewrite proj₂ s*-zero x | ·-zeroʳ v = 0+0=0
 
