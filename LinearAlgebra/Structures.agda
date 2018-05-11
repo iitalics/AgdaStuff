@@ -27,11 +27,11 @@ record IsVectorSpaceWithoutDot
   open IsSemiring scalarIsSemiring public
     using ()
     renaming ( +-assoc to s+-assoc
-             ; *-assoc to s*-assoc
+             ; +-comm to s+-comm
              ; +-identity to s+-identity
+             ; *-assoc to s*-assoc
              ; *-identity to s*-identity
-             ; zero to s*-zero
-             ; +-comm to s+-comm )
+             ; zero to s*-zero )
 
   open IsMonoid vectorIsMonoid public
     using ()
@@ -50,5 +50,6 @@ record IsVectorSpace
   field
     isVectorSpaceWithoutDot : IsVectorSpaceWithoutDot S V _s+_ _s*_ _+_ _*_ s0 s1 v0
     ·-zeroˡ : ∀ u → v0 · u ≡ s0
+    ·-zeroʳ : ∀ u → u · v0 ≡ s0
 
   open IsVectorSpaceWithoutDot isVectorSpaceWithoutDot public

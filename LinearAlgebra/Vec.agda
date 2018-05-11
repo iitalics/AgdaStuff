@@ -27,6 +27,7 @@ module LinearAlgebra.Vec
     using ()
     renaming ( +-assoc to s+-assoc
              ; +-identity to s+-identity
+             ; +-cong to s+-cong
              ; *-identity to s*-identity
              ; zero to s*-zero
              ; distrib to s*+-distrib )
@@ -50,7 +51,9 @@ module LinearAlgebra.Vec
   _·_ : ∀ {n} → Vec n → Vec n → Scalar
   v · u = foldr _ _s+_ s0 (zipWith _s*_ v u)
 
-  -------------------------------------------
+  ----------------------------------------------------------
+  ----------------------------------------------------------
+  ----------------------------------------------------------
 
   module Properties where
 
@@ -72,7 +75,7 @@ module LinearAlgebra.Vec
 
     *-zeroˡ : ∀ {n} (v : Vec n) → s0 * v ≡ v0
     *-zeroˡ [] = PE.refl
-    *-zeroˡ (x ∷ v) rewrite *-zeroˡ v | proj₁ s*-zero x = PE.refl
+    *-zeroˡ (x ∷ v) = PE.cong₂ _∷_ (proj₁ s*-zero x) (*-zeroˡ v)
 
     *-zeroʳ : ∀ n (k : Scalar) → k * (v0 {n}) ≡ v0
     *-zeroʳ zero k = PE.refl
@@ -88,6 +91,14 @@ module LinearAlgebra.Vec
     *+-distribˡ : ∀ {n} (k : Scalar) (v u : Vec n) → k * (v + u) ≡ (k * v) + (k * u)
     *+-distribˡ k [] [] = PE.refl
     *+-distribˡ k (x ∷ v) (y ∷ u) = PE.cong₂ _∷_ (proj₁ s*+-distrib k x y) (*+-distribˡ k v u)
+
+    ·-zeroˡ : ∀ {n} (v : Vec n) → v0 · v ≡ s0
+    ·-zeroˡ [] = PE.refl
+    ·-zeroˡ (x ∷ v) rewrite proj₁ s*-zero x | ·-zeroˡ v = proj₁ s+-identity s0
+
+    ·-zeroʳ : ∀ {n} (v : Vec n) → v · v0 ≡ s0
+    ·-zeroʳ [] = PE.refl
+    ·-zeroʳ (x ∷ v) rewrite proj₂ s*-zero x | ·-zeroʳ v = proj₁ s+-identity s0
 
 
     -- Algebra structures
@@ -112,3 +123,10 @@ module LinearAlgebra.Vec
       ; *-identityˡ = *-identityˡ
       ; *-zeroˡ = *-zeroˡ
       ; *-zeroʳ = *-zeroʳ n }
+
+    isVectorSpace : ∀ n →
+      IsVectorSpace Scalar (Vec n) _s+_ _s*_ _+_ _*_ _·_ s0 s1 v0
+    isVectorSpace n = record
+      { isVectorSpaceWithoutDot = isVectorSpaceWithoutDot n
+      ; ·-zeroˡ = ·-zeroˡ
+      ; ·-zeroʳ = ·-zeroʳ }
