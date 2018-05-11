@@ -93,13 +93,16 @@ module LinearAlgebra.Vec
     *+-distribˡ k [] [] = PE.refl
     *+-distribˡ k (x ∷ v) (y ∷ u) = PE.cong₂ _∷_ (proj₁ s*+-distrib k x y) (*+-distribˡ k v u)
 
+    0+0=0 : s0 s+ s0 ≡ s0
+    0+0=0 = proj₁ s+-identity s0
+
     ·-zeroˡ : ∀ {n} (v : Vec n) → v0 · v ≡ s0
     ·-zeroˡ [] = PE.refl
-    ·-zeroˡ (x ∷ v) rewrite proj₁ s*-zero x | ·-zeroˡ v = proj₁ s+-identity s0
+    ·-zeroˡ (x ∷ v) rewrite proj₁ s*-zero x | ·-zeroˡ v = 0+0=0
 
     ·-zeroʳ : ∀ {n} (v : Vec n) → v · v0 ≡ s0
     ·-zeroʳ [] = PE.refl
-    ·-zeroʳ (x ∷ v) rewrite proj₂ s*-zero x | ·-zeroʳ v = proj₁ s+-identity s0
+    ·-zeroʳ (x ∷ v) rewrite proj₂ s*-zero x | ·-zeroʳ v = 0+0=0
 
 
     -- Algebra structures
