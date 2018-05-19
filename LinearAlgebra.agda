@@ -1,16 +1,13 @@
-open import Level using (Level; _⊔_)
-open import Algebra.Structures
+open import Level using (suc; _⊔_)
 open import Algebra.FunctionProperties.Core
-open import Relation.Binary.PropositionalEquality as PE using (_≡_)
 
-open import Data.Vec using (Vec; _∷_; []; foldr; zipWith)
 open import LinearAlgebra.Structures
 
 module LinearAlgebra where
 
 -- Vector space without dot product
 
-record VectorSpaceWithoutDot c₁ c₂ : Set (Level.suc (c₁ ⊔ c₂)) where
+record VectorSpaceWithoutDot c₁ c₂ : Set (suc (c₁ ⊔ c₂)) where
   field
     Scalar : Set c₁
     Vector : Set c₂
@@ -25,7 +22,7 @@ record VectorSpaceWithoutDot c₁ c₂ : Set (Level.suc (c₁ ⊔ c₂)) where
 
 -- Vector space
 
-record VectorSpace c₁ c₂ : Set (Level.suc (c₁ ⊔ c₂)) where
+record VectorSpace c₁ c₂ : Set (suc (c₁ ⊔ c₂)) where
   field
     Scalar : Set c₁
     Vector : Set c₂

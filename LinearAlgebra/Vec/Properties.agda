@@ -21,7 +21,7 @@ module LinearAlgebra.Vec.Properties
   (scalarIsSemiring : IsSemiring _≡_ _s+_ _s*_ s0 s1)
   where
 
-  open import LinearAlgebra.Vec scalarIsSemiring
+  open import LinearAlgebra.Vec _s+_ _s*_ s0 s1
 
   open IsSemiring scalarIsSemiring
     using ()

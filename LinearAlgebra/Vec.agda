@@ -1,12 +1,9 @@
 open import Function
-open import Relation.Binary.PropositionalEquality as PE using (_≡_)
 open import Algebra.FunctionProperties.Core
-open import Algebra.Structures
 
 open import Data.Nat using (ℕ)
 open import Data.Vec
-  using ( _∷_; []
-        ; tabulate; map; foldr; zipWith)
+  using ( _∷_; []; tabulate; map; foldr; zipWith)
   renaming (Vec to BaseVec)
 
 --------------------------------------------------------------------------
@@ -14,9 +11,8 @@ open import Data.Vec
 
 module LinearAlgebra.Vec
   {c} {Scalar : Set c}
-  {_s+_ _s*_ : Op₂ Scalar}
-  {s0 s1 : Scalar}
-  (scalarIsSemiring : IsSemiring _≡_ _s+_ _s*_ s0 s1)
+  (_s+_ _s*_ : Op₂ Scalar)
+  (s0 s1 : Scalar)
   where
 
   -- `Vec n' is the type of n-dimensional vectors of Scalar elements
