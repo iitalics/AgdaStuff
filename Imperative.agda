@@ -1,20 +1,27 @@
 open import Level using (_⊔_) renaming (suc to lsuc)
 open import Function
-open import Relation.Nullary using (Dec; yes; no; ¬_)
-open import Relation.Binary as B using (Rel; REL)
-open import Relation.Binary.PropositionalEquality as P using (_≡_)
-open import Relation.Unary as U using (Pred)
 
-open import Data.Nat using (ℕ; suc; _+_; _*_; pred; _≤_; _≤?_; _≟_)
-open import Data.Product using (_,_)
-open import Data.Empty using (⊥; ⊥-elim)
-open import Data.Unit using (⊤; tt)
-
-open import Data.Fin using (Fin)
-open import Data.Vec using (Vec; []; _∷_; _[_]≔_; lookup)
-open import Data.Star using (Star; _◅_; _◅◅_; ε)
+open import Data.Nat using (ℕ; suc)
+open import Data.Fin using (Fin; #_)
+open import Data.Vec using (Vec; _∷_; [])
+open import Data.List using (List; _∷_; [])
 
 module Imperative where
 
 open import Imperative.Base public
-open import Imperative.Semantics public
+open import Imperative.Extract
+
+X = # 0
+Y = # 1
+
+fact : St 2
+fact =
+  Y ≔ (cst 1) ⟫         -- ρ = [n, 1]
+  while (nz? (var X))   -- invar: ρ = [k, n!/k!]
+  (
+    Y ≔ var Y *′ var X ⟫
+    X ≔ 1- (var X)
+  )                     -- postcond: ρ = [0, n!]
+
+fact-sexp = stToSexp "fact" ("x" ∷ "y" ∷ []) fact
+fact-extr = sexpToString fact-sexp
