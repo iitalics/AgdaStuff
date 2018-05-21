@@ -19,6 +19,23 @@ open import Imperative.Base
 module Imperative.Semantics where
 
 ------------------------------------------------------------------------
+-- Aux predicates
+
+private
+  Pred₀ : Set → Set₁
+  Pred₀ A = Pred A Level.zero
+
+data Zero    : Pred₀ ℕ where is-z : Zero 0
+data NonZero : Pred₀ ℕ where is-nz : ∀ k → NonZero (suc k)
+
+zero? : U.Decidable Zero
+zero? 0 = yes is-z
+zero? (suc _) = no λ ()
+non-zero? : U.Decidable NonZero
+non-zero? 0 = no λ ()
+non-zero? (suc k) = yes (is-nz k)
+
+------------------------------------------------------------------------
 -- Semantics of expressions
 
 ⟦_⟧e : ∀ {n} → Ex n → Env n → V
@@ -30,14 +47,14 @@ module Imperative.Semantics where
 ⟦ 1- e ⟧e ρ = pred (⟦ e ⟧e ρ)
 
 ⟦_⟧P : ∀ {n} → Pr n → Pred (Env n) _
-⟦ z? e ⟧P ρ = 0 ≡ ⟦ e ⟧e ρ
-⟦ nz? e ⟧P ρ = 1 ≤ ⟦ e ⟧e ρ
+⟦ z? e ⟧P ρ = Zero (⟦ e ⟧e ρ)
+⟦ nz? e ⟧P ρ = NonZero (⟦ e ⟧e ρ)
 ⟦ e₁ =′ e₂ ⟧P ρ = ⟦ e₁ ⟧e ρ ≡ ⟦ e₂ ⟧e ρ
 ⟦ e₁ ≤′ e₂ ⟧P ρ = ⟦ e₁ ⟧e ρ ≤ ⟦ e₂ ⟧e ρ
 
 ⟦_⟧p : ∀ {n} (p : Pr n) → U.Decidable ⟦ p ⟧P
-⟦ z? e ⟧p ρ = 0 ≟ ⟦ e ⟧e ρ
-⟦ nz? e ⟧p ρ = 1 ≤? ⟦ e ⟧e ρ
+⟦ z? e ⟧p ρ = zero? $ ⟦ e ⟧e ρ
+⟦ nz? e ⟧p ρ = non-zero? $ ⟦ e ⟧e ρ
 ⟦ e₁ =′ e₂ ⟧p ρ = ⟦ e₁ ⟧e ρ ≟ ⟦ e₂ ⟧e ρ
 ⟦ e₁ ≤′ e₂ ⟧p ρ = ⟦ e₁ ⟧e ρ ≤? ⟦ e₂ ⟧e ρ
 
@@ -52,17 +69,17 @@ record M (n : ℕ) : Set where
 
 -- predicates about statements
 
-data IsNoOp {n} : Pred (St n) Level.zero where
+data IsNoOp {n} : Pred₀ (St n) where
   is-no-op : IsNoOp no-op
+
+data CanStep {n} : Pred₀ (M n) where
+  can-step : ∀ {ρ s} → ¬ IsNoOp s → CanStep ⟨ ρ , s ⟩
 
 is-no-op? : ∀ {n} → U.Decidable (IsNoOp {n})
 is-no-op? (x ≔ e) = no λ ()
 is-no-op? (s ⟫ s₁) = no λ ()
 is-no-op? (while p s) = no λ ()
 is-no-op? no-op = yes is-no-op
-
-data CanStep {n} : Pred (M n) Level.zero where
-  can-step : ∀ {ρ s} → ¬ IsNoOp s → CanStep ⟨ ρ , s ⟩
 
 ------------------------------------------------------------------------
 -- Small-step semantics

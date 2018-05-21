@@ -4,6 +4,11 @@ open import Data.Vec using (Vec)
 
 module Imperative.Base where
 
+infixr 3 _⟫_
+infix 4 _=′_ _≤′_ _≔_
+infixl 5 _+′_
+infixl 6 _*′_
+
 V = ℕ
 Env = Vec V
 
