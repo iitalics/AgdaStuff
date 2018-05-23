@@ -10,26 +10,29 @@ module LinearAlgebra.Structures where
 --------------------------------------------------------------------------
 -- Vector spaces without dot product
 
-record IsVectorSpaceWithoutDot
+IsScalar = IsCommutativeSemiring
+
+record IsVectorSpace
     {c₁ c₂} {S : Set c₁} {V : Set c₂}
     (_s+_ _s*_ : Op₂ S)
     (_+_ : Op₂ V) (_*_ : S → V → V)
     (s0 s1 : S) (v0 : V)
     : Set (c₁ ⊔ c₂) where
   field
-    scalarIsSemiring : IsSemiring _≡_ _s+_ _s*_ s0 s1
+    scalarIsSemiring : IsScalar _≡_ _s+_ _s*_ s0 s1
     vectorIsMonoid   : IsMonoid _≡_ _+_ v0
-    *+-distribˡ : ∀ k v u → k * (v + u) ≡ (k * v) + (k * u)
+    distribˡ : ∀ k v u → k * (v + u) ≡ (k * v) + (k * u)
     *-identityˡ : ∀ u → s1 * u ≡ u
     *-zeroˡ     : ∀ u → s0 * u ≡ v0
     *-zeroʳ     : ∀ k → k * v0 ≡ v0
 
-  open IsSemiring scalarIsSemiring public
+  open IsCommutativeSemiring scalarIsSemiring public
     using ()
     renaming ( +-assoc to s+-assoc
              ; +-comm to s+-comm
              ; +-identity to s+-identity
              ; *-assoc to s*-assoc
+             ; *-comm to s*-comm
              ; *-identity to s*-identity
              ; zero to s*-zero )
 
@@ -37,19 +40,3 @@ record IsVectorSpaceWithoutDot
     using ()
     renaming ( assoc to +-assoc
              ; identity to +-identity )
-
---------------------------------------------------------------------------
--- Vector spaces
-
-record IsVectorSpace
-    {c₁ c₂} {S : Set c₁} {V : Set c₂}
-    (_s+_ _s*_ : Op₂ S)
-    (_+_ : Op₂ V) (_*_ : S → V → V) (_·_ : V → V → S)
-    (s0 s1 : S) (v0 : V)
-    : Set (c₁ ⊔ c₂) where
-  field
-    isVectorSpaceWithoutDot : IsVectorSpaceWithoutDot _s+_ _s*_ _+_ _*_ s0 s1 v0
-    ·-zeroˡ : ∀ u → v0 · u ≡ s0
-    ·-zeroʳ : ∀ u → u · v0 ≡ s0
-
-  open IsVectorSpaceWithoutDot isVectorSpaceWithoutDot public

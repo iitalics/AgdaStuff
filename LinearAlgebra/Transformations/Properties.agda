@@ -13,11 +13,12 @@ module LinearAlgebra.Transformations.Properties
     {_s+_ _s*_ : Op₂ S}
     {_+_ : Op₂ V} {_*_ : S → V → V}
     {s0 s1 : S} {v0 : V}
-    (isVecSp : IsVectorSpaceWithoutDot _s+_ _s*_ _+_ _*_ s0 s1 v0)
+    (isVecSp : IsVectorSpace _s+_ _s*_ _+_ _*_ s0 s1 v0)
     where
 
-    open IsVectorSpaceWithoutDot isVecSp
-      using ( *+-distribˡ )
+    open IsVectorSpace isVecSp
+      using ()
+      renaming (distribˡ to *+-distribˡ)
 
     open import LinearAlgebra.Transformations _+_ _*_ _+_ _*_
 
