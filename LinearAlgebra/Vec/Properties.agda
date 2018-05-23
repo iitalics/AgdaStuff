@@ -18,12 +18,12 @@ module LinearAlgebra.Vec.Properties
   {c} {Scalar : Set c}
   {_s+_ _s*_ : Op₂ Scalar}
   {s0 s1 : Scalar}
-  (scalarIsSemiring : IsSemiring _≡_ _s+_ _s*_ s0 s1)
+  (isScalar : IsScalar _s+_ _s*_ s0 s1)
   where
 
   open import LinearAlgebra.Vec _s+_ _s*_ s0 s1
 
-  open IsSemiring scalarIsSemiring
+  open IsScalar isScalar
     using ()
     renaming ( +-assoc to s+-assoc
              ; +-identity to s+-identity
@@ -33,7 +33,7 @@ module LinearAlgebra.Vec.Properties
              ; distrib to s*+-distrib )
 
 
-  -- Properties of +
+  -- Properties of vector _+_
 
   +-assoc : ∀ {n} → Associative _≡_ (_+_ {n})
   +-assoc [] [] [] = PE.refl
@@ -47,7 +47,7 @@ module LinearAlgebra.Vec.Properties
   +-identityʳ (x ∷ v) = PE.cong₂ _∷_ (proj₂ s+-identity x) (+-identityʳ v)
 
 
-  -- Properties of _*_
+  -- Properties of scalar _*_
 
   *-zeroˡ : ∀ {n} (v : Vec n) → s0 * v ≡ v0
   *-zeroʳ : ∀ n (k : Scalar) → k * (v0 {n}) ≡ v0
@@ -95,9 +95,9 @@ module LinearAlgebra.Vec.Properties
   isVectorSpace : ∀ n →
     IsVectorSpace {V = Vec n} _s+_ _s*_ _+_ _*_ s0 s1 v0
   isVectorSpace n = record
-    { scalarIsSemiring = scalarIsSemiring
+    { scalarIsScalar = isScalar
     ; vectorIsMonoid = +-isMonoid n
-    ; *+-distribˡ = *+-distribˡ
+    ; distribˡ = *+-distribˡ
     ; *-identityˡ = *-identityˡ
     ; *-zeroˡ = *-zeroˡ
     ; *-zeroʳ = *-zeroʳ n }
