@@ -14,9 +14,8 @@ record VectorSpace c₁ c₂ : Set (suc (c₁ ⊔ c₂)) where
     V : Set c₂
     _+_ : Op₂ V
     v0 : V
-    negate : Op₁ V
     _*_ : Scalar.Carrier scalar → V → V
-    isVectorSpace : IsVectorSpace scalar _+_ v0 negate _*_
+    isVectorSpace : IsVectorSpace scalar _+_ v0 _*_
 
   open IsVectorSpace isVectorSpace public
 

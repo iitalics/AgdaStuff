@@ -46,6 +46,24 @@ record IsScalar
       1# ∎
     where open PE.≡-Reasoning
 
+  -1# = - 1#
+
+  private
+    -1*-inverseˡ : LeftInverse _≡_ 0# (-1# *_) _+_
+    -1*-inverseˡ x =
+      begin
+        (-1# * x) + x        ≡⟨ PE.cong₂ _+_ (*-comm _ _)
+                                 (PE.sym (proj₂ *-identity x)) ⟩
+        (x * -1#) + (x * 1#) ≡⟨ PE.sym (proj₁ distrib x -1# 1#) ⟩
+        x * (-1# + 1#)       ≡⟨ PE.cong (x *_) (proj₁ -‿inverse 1#) ⟩
+        x * 0#               ≡⟨ proj₂ zero x ⟩
+        0# ∎
+      where open PE.≡-Reasoning
+
+  -1*-inverse : Inverse _≡_ 0# (-1# *_) _+_
+  -1*-inverse = -1*-inverseˡ
+    , λ x → PE.trans (+-comm _ _) (-1*-inverseˡ x)
+
 -- Scalar type
 
 record Scalar c : Set (Level.suc c) where

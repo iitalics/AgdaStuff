@@ -31,3 +31,6 @@ module LinearAlgebra.Transformations.Properties
       ; sum = distribˡ k }
       where
         open PE.≡-Reasoning
+
+    negate-is-linear : IsLinearFn negate
+    negate-is-linear = scale-is-linear s-1

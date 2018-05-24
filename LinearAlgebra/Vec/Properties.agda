@@ -29,7 +29,7 @@ module LinearAlgebra.Vec.Properties
              ; _*_ to _s*_
              ; +-identity to s+-identity
              ; +-assoc to s+-assoc
-             ; -‿inverse to s+-inverse
+             ; -1*-inverse to s-1*-inverse
              ; *-identity to s*-identity
              ; *-assoc to s*-assoc
              ; zero to s*-zero
@@ -51,9 +51,9 @@ module LinearAlgebra.Vec.Properties
   +-inverseˡ : ∀ {n} → LeftInverse _≡_ v0 (negate {n}) _+_
   +-inverseʳ : ∀ {n} → RightInverse _≡_ v0 (negate {n}) _+_
   +-inverseˡ [] = PE.refl
-  +-inverseˡ (x ∷ xs) = PE.cong₂ _∷_ (proj₁ s+-inverse x) (+-inverseˡ xs)
+  +-inverseˡ (x ∷ xs) = PE.cong₂ _∷_ (proj₁ s-1*-inverse x) (+-inverseˡ xs)
   +-inverseʳ [] = PE.refl
-  +-inverseʳ (x ∷ xs) = PE.cong₂ _∷_ (proj₂ s+-inverse x) (+-inverseʳ xs)
+  +-inverseʳ (x ∷ xs) = PE.cong₂ _∷_ (proj₂ s-1*-inverse x) (+-inverseʳ xs)
 
   -- Properties of scalar _*_
 
@@ -96,9 +96,9 @@ module LinearAlgebra.Vec.Properties
     ; inverse = +-inverseˡ , +-inverseʳ
     ; ⁻¹-cong = PE.cong _ }
 
-  isVectorSpace : ∀ n → IsVectorSpace scalar {V = Vec n} _+_ v0 negate _*_
+  isVectorSpace : ∀ n → IsVectorSpace scalar {V = Vec n} _+_ v0 _*_
   isVectorSpace n = record
-    { vectorIsGroup = +-isGroup n
+    { +-isGroup = +-isGroup n
     ; *-identityˡ = *-identityˡ
     ; *-assoc = *-assoc
     ; distribˡ = distribˡ

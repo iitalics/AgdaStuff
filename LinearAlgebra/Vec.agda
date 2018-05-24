@@ -18,7 +18,7 @@ module LinearAlgebra.Vec
   open Scalar scalar
     using ()
     renaming ( Carrier to S
-             ; 0# to s0
+             ; 0# to s0 ; 1# to s1
              ; _+_ to s+
              ; _*_ to s*
              ; -_ to s- )
@@ -36,11 +36,11 @@ module LinearAlgebra.Vec
   _+_ : ∀ {n} → Op₂ (Vec n)
   _+_ = zipWith s+
 
-  negate : ∀ {n} → Op₁ (Vec n)
-  negate = map s-
-
   _*_ : ∀ {n} → S → Vec n → Vec n
   k * u = map (s* k) u
+
+  negate : ∀ {n} → Op₁ (Vec n)
+  negate = s- s1 *_
 
   _·_ : ∀ {n} → Vec n → Vec n → S
   v · u = foldr _ s+ s0 (zipWith s* v u)

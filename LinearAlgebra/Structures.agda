@@ -13,14 +13,17 @@ module LinearAlgebra.Structures where
 
 record IsVectorSpace
     {c₁} (scalar : Scalar c₁)
-    {c₂} {V : Set c₂} (_+_ : Op₂ V) (v0 : V) (negate : Op₁ V)
+    {c₂} {V : Set c₂} (_+_ : Op₂ V) (v0 : V)
     (_*_ : Scalar.Carrier scalar → V → V)
     : Set (c₁ ⊔ c₂) where
 
   open Scalar scalar public
     using ()
-    renaming ( _+_ to _s+_
+    renaming ( Carrier to S
+             ; _+_ to _s+_
+             ; -_ to s-
              ; _*_ to _s*_
+             ; _⁻¹ to s⁻¹
              ; 0# to s0 ; 1# to s1
              ; +-assoc to s+-assoc
              ; +-comm to s+-comm
@@ -29,15 +32,21 @@ record IsVectorSpace
              ; *-comm to s*-comm
              ; *-identity to s*-identity )
 
+  s-1 : S
+  s-1 = s- s1
+
+  negate : Op₁ V
+  negate v = s-1 * v
+
   field
-    vectorIsGroup : IsGroup _≡_ _+_ v0 negate
+    +-isGroup : IsGroup _≡_ _+_ v0 negate
     *-identityˡ : ∀ u → s1 * u ≡ u
     *-assoc : ∀ j k v → (j s* k) * v ≡ j * (k * v)
     distribˡ : ∀ k v u → k * (v + u) ≡ (k * v) + (k * u)
     distribʳ : ∀ j k v → (j s+ k) * v ≡ (j * v) + (k * v)
     zeroˡ : ∀ u → s0 * u ≡ v0
 
-  open IsGroup vectorIsGroup public
+  open IsGroup +-isGroup public
     using ()
     renaming ( assoc to +-assoc
              ; identity to +-identity
