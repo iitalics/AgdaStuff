@@ -5,8 +5,11 @@ open import LinearAlgebra.Scalar
 
 open import Data.Nat using (ℕ)
 open import Data.Vec
-  using ( _∷_; []; replicate; zipWith; foldr; tabulate )
+  using ( _∷_; []; map; replicate; zipWith; foldr; tabulate )
   renaming (Vec to BaseVec)
+
+--------------------------------------------------------------------------
+-- Matrices as 2-dimensional vector of scalars
 
 module LinearAlgebra.Matrix
   {c} (scalar : Scalar c)
@@ -21,7 +24,7 @@ open Scalar scalar
            ; -_ to s- )
 
 open import LinearAlgebra.Vec scalar
-  using ( Vec ; v0 ; essential )
+  using ( Vec ; v0 ; essential ; _·_ )
   renaming ( _+_ to _v+_
            ; _*_ to _v*_ )
 
@@ -43,3 +46,7 @@ m1 = tabulate essential
 -- matrix transpose
 transpose : ∀ {n m} → Mat n m → Mat m n
 transpose = foldr (Mat _) (zipWith _∷_) (replicate [])
+
+-- matrix application
+apply : ∀ {n m} → Mat n m → Vec m → Vec n
+apply m v = map (v ·_) m
