@@ -34,3 +34,19 @@ module LinearAlgebra.Transformations.Properties
 
     negate-is-linear : IsLinearFn negate
     negate-is-linear = scale-is-linear s-1
+
+    ∘-is-linear : ∀ {f g}
+      → IsLinearFn f
+      → IsLinearFn g
+      → IsLinearFn (f ∘ g)
+    ∘-is-linear {f} {g} f-lin g-lin = record
+      { scale = λ k v → begin
+          f (g (k * v))   ≡⟨ PE.cong f (IsLinearFn.scale g-lin k v) ⟩
+          f (k * g v)     ≡⟨ IsLinearFn.scale f-lin k (g v) ⟩
+          k * f (g v) ∎
+      ; sum = λ v u → begin
+          f (g (v + u))   ≡⟨ PE.cong f (IsLinearFn.sum g-lin v u) ⟩
+          f (g v + g u)   ≡⟨ IsLinearFn.sum f-lin (g v) (g u) ⟩
+          f (g v) + f (g u) ∎ }
+      where
+        open PE.≡-Reasoning
