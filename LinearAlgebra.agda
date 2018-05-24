@@ -11,11 +11,15 @@ open import LinearAlgebra.Scalar public
 record VectorSpace c₁ c₂ : Set (suc (c₁ ⊔ c₂)) where
   field
     scalar : Scalar c₁
-    Vector : Set c₂
-    _+_ : Op₂ Vector
-    negate : Vector → Vector
-    v0 : Vector
-    _*_ : Scalar.Carrier scalar → Vector → Vector
+    V : Set c₂
+    _+_ : Op₂ V
+    negate : Op₁ V
+    v0 : V
+    _*_ : Scalar.Carrier scalar → V → V
     isVectorSpace : IsVectorSpace scalar _+_ v0 negate _*_
 
   open IsVectorSpace isVectorSpace public
+
+  open Scalar scalar public
+    using ()
+    renaming (Carrier to S)

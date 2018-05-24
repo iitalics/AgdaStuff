@@ -3,34 +3,31 @@ open import Function
 open import Algebra.FunctionProperties.Core
 open import Relation.Binary.PropositionalEquality as PE using (_≡_)
 
-open import LinearAlgebra.Structures
+open import LinearAlgebra
+import LinearAlgebra.Transformations
 
 module LinearAlgebra.Transformations.Properties
   where
 
   module One
-    {c₁ c₂} {S : Set c₁} {V : Set c₂}
-    {_s+_ _s*_ : Op₂ S}
-    {_+_ : Op₂ V} {_*_ : S → V → V}
-    {s0 s1 : S} {v0 : V}
-    (isVecSp : IsVectorSpace _s+_ _s*_ _+_ _*_ s0 s1 v0)
+    {c₁ c₂} (vectorSpace : VectorSpace c₁ c₂)
     where
 
-    open IsVectorSpace isVecSp
-      using ()
-      renaming (distribˡ to *+-distribˡ)
+    open VectorSpace vectorSpace
+    open LinearAlgebra.Transformations _+_ _*_ _+_ _*_
 
-    open import LinearAlgebra.Transformations _+_ _*_ _+_ _*_
-
-    id-isLinear : IsLinearFn id
-    id-isLinear = record
+    id-is-linear : IsLinearFn id
+    id-is-linear = record
       { scale = λ _ _ → PE.refl
-      ; sum   = λ _ _ → PE.refl }
+      ; sum = λ _ _ → PE.refl }
 
-    identity : LinearFn
-    identity = record { isLinearFn = id-isLinear }
-
-    scale-isLinear : ∀ k → IsLinearFn (_*_ k)
-    scale-isLinear k = record
-      { scale = λ j v → {!!}
-      ; sum = *+-distribˡ k }
+    scale-is-linear : ∀ k → IsLinearFn (k *_)
+    scale-is-linear k = record
+      { scale = λ j v → begin
+          k * (j * v)    ≡⟨ PE.sym $ *-assoc k j v ⟩
+          (k s* j) * v   ≡⟨ PE.cong (_* v) (s*-comm k j) ⟩
+          (j s* k) * v   ≡⟨ *-assoc j k v ⟩
+          j * (k * v) ∎
+      ; sum = distribˡ k }
+      where
+        open PE.≡-Reasoning

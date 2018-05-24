@@ -35,6 +35,7 @@ record IsVectorSpace
     distribʳ : ∀ j k v → (j s+ k) * v ≡ (j * v) + (k * v)
     *-identityˡ : ∀ u → s1 * u ≡ u
     *-zeroˡ : ∀ u → s0 * u ≡ v0
+    *-assoc : ∀ j k v → (j s* k) * v ≡ j * (k * v)
 
   open IsGroup vectorIsGroup public
     using ()
