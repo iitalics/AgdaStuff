@@ -18,7 +18,7 @@ module LinearAlgebra.Vec
   open Scalar scalar
     using ()
     renaming ( Carrier to S
-             ; 0# to s0 ; 1# to s1
+             ; 0# to s0 ; -1# to s-1
              ; _+_ to s+
              ; _*_ to s*
              ; -_ to s- )
@@ -30,17 +30,19 @@ module LinearAlgebra.Vec
 
   -- Vector operators:
 
-  v0 : ∀ {n} → Vec n
-  v0 = replicate s0
+  module _ {n} where
 
-  _+_ : ∀ {n} → Op₂ (Vec n)
-  _+_ = zipWith s+
+    v0 : Vec n
+    v0 = replicate s0
 
-  _*_ : ∀ {n} → S → Vec n → Vec n
-  k * u = map (s* k) u
+    _+_ : Op₂ (Vec n)
+    _+_ = zipWith s+
 
-  negate : ∀ {n} → Op₁ (Vec n)
-  negate = s- s1 *_
+    _*_ : S → Vec n → Vec n
+    k * u = map (s* k) u
 
-  _·_ : ∀ {n} → Vec n → Vec n → S
-  v · u = foldr _ s+ s0 (zipWith s* v u)
+    negate : Op₁ (Vec n)
+    negate = s-1 *_
+
+    _·_ : Vec n → Vec n → S
+    v · u = foldr _ s+ s0 (zipWith s* v u)

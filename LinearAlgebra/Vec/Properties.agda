@@ -6,7 +6,7 @@ open import Algebra.Structures
 
 open import LinearAlgebra
 
-open import Data.Nat using (ℕ; suc; zero)
+open import Data.Nat using (ℕ)
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Data.Vec using (_∷_; []; replicate; zipWith; map; foldr)
 
@@ -71,39 +71,41 @@ module LinearAlgebra.Vec.Properties
   -- Properties of _*_ and _+_
 
   distribˡ : ∀ {n} (k : S) (v u : Vec n) → k * (v + u) ≡ (k * v) + (k * u)
+  distribʳ : ∀ {n} (k j : S) (v : Vec n) → (k s+ j) * v ≡ (k * v) + (j * v)
   distribˡ k [] [] = PE.refl
   distribˡ k (x ∷ v) (y ∷ u) = PE.cong₂ _∷_ (proj₁ s*+-distrib k x y) (distribˡ k v u)
-  distribʳ : ∀ {n} (k j : S) (v : Vec n) → (k s+ j) * v ≡ (k * v) + (j * v)
   distribʳ k j [] = PE.refl
   distribʳ k j (x ∷ v) = PE.cong₂ _∷_ (proj₂ s*+-distrib x k j) (distribʳ k j v)
 
   -- Algebra structures
 
-  +-isSemigroup : ∀ n → IsSemigroup (_≡_ {A = Vec n}) _+_
-  +-isSemigroup n = record
-    { isEquivalence = PE.isEquivalence
-    ; assoc = +-assoc
-    ; ∙-cong = PE.cong₂ _ }
+  module _ (n : ℕ) where
 
-  +-isMonoid : ∀ n → IsMonoid (_≡_ {A = Vec n}) _+_ v0
-  +-isMonoid n = record
-    { isSemigroup = +-isSemigroup n
-    ; identity = +-identityˡ , +-identityʳ }
+    +-isSemigroup : IsSemigroup (_≡_ {A = Vec n}) _+_
+    +-isSemigroup = record
+      { isEquivalence = PE.isEquivalence
+      ; assoc = +-assoc
+      ; ∙-cong = PE.cong₂ _ }
 
-  +-isGroup : ∀ n → IsGroup (_≡_ {A = Vec n}) _+_ v0 negate
-  +-isGroup n = record
-    { isMonoid = +-isMonoid n
-    ; inverse = +-inverseˡ , +-inverseʳ
-    ; ⁻¹-cong = PE.cong _ }
+    +-isMonoid : IsMonoid _≡_ _+_ v0
+    +-isMonoid = record
+      { isSemigroup = +-isSemigroup
+      ; identity = +-identityˡ , +-identityʳ }
 
-  isVectorSpace : ∀ n → IsVectorSpace scalar {V = Vec n} _+_ v0 _*_
-  isVectorSpace n = record
-    { +-isGroup = +-isGroup n
-    ; *-identityˡ = *-identityˡ
-    ; *-assoc = *-assoc
-    ; distribˡ = distribˡ
-    ; distribʳ = distribʳ
-    ; zeroˡ = zeroˡ }
+    +-isGroup : IsGroup _≡_ _+_ v0 negate
+    +-isGroup = record
+      { isMonoid = +-isMonoid
+      ; inverse = +-inverseˡ , +-inverseʳ
+      ; ⁻¹-cong = PE.cong _ }
 
-  vectorSpace : ∀ n → VectorSpace _ _
-  vectorSpace n = record { isVectorSpace = isVectorSpace n }
+    isVectorSpace : IsVectorSpace scalar _+_ v0 _*_
+    isVectorSpace = record
+      { +-isGroup = +-isGroup
+      ; *-identityˡ = *-identityˡ
+      ; *-assoc = *-assoc
+      ; distribˡ = distribˡ
+      ; distribʳ = distribʳ
+      ; zeroˡ = zeroˡ }
+
+    vectorSpace : VectorSpace _ _
+    vectorSpace = record { isVectorSpace = isVectorSpace }

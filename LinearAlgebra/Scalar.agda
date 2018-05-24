@@ -53,9 +53,9 @@ record IsScalar
     -1*-inverseˡ x =
       begin
         (-1# * x) + x        ≡⟨ PE.cong₂ _+_ (*-comm _ _)
-                                 (PE.sym (proj₂ *-identity x)) ⟩
-        (x * -1#) + (x * 1#) ≡⟨ PE.sym (proj₁ distrib x -1# 1#) ⟩
-        x * (-1# + 1#)       ≡⟨ PE.cong (x *_) (proj₁ -‿inverse 1#) ⟩
+                                 (PE.sym $ proj₂ *-identity x) ⟩
+        (x * -1#) + (x * 1#) ≡⟨ PE.sym $ proj₁ distrib x -1# 1# ⟩
+        x * (-1# + 1#)       ≡⟨ PE.cong (x *_) $ proj₁ -‿inverse 1# ⟩
         x * 0#               ≡⟨ proj₂ zero x ⟩
         0# ∎
       where open PE.≡-Reasoning
