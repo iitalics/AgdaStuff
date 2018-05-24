@@ -1,35 +1,46 @@
 open import Function
 open import Algebra.FunctionProperties.Core
 
+open import LinearAlgebra.Scalar
+
 open import Data.Nat using (ℕ)
 open import Data.Vec
-  using ( _∷_; []; tabulate; map; foldr; zipWith)
+  using ( _∷_; []; replicate; map; foldr; zipWith)
   renaming (Vec to BaseVec)
 
 --------------------------------------------------------------------------
 -- Traditional n-dimensional vector
 
 module LinearAlgebra.Vec
-  {c} {Scalar : Set c}
-  (_s+_ _s*_ : Op₂ Scalar)
-  (s0 s1 : Scalar)
+  {c} (scalar : Scalar c)
   where
+
+  open Scalar scalar
+    using ()
+    renaming ( Carrier to S
+             ; 0# to s0
+             ; _+_ to s+
+             ; _*_ to s*
+             ; -_ to s- )
 
   -- `Vec n' is the type of n-dimensional vectors of Scalar elements
 
   Vec : ℕ → Set c
-  Vec = BaseVec Scalar
+  Vec = BaseVec S
 
   -- Vector operators:
 
   v0 : ∀ {n} → Vec n
-  v0 = tabulate (const s0)
+  v0 = replicate s0
 
   _+_ : ∀ {n} → Op₂ (Vec n)
-  _+_ = zipWith _s+_
+  _+_ = zipWith s+
 
-  _*_ : ∀ {n} → Scalar → Vec n → Vec n
-  k * u = map (_s*_ k) u
+  negate : ∀ {n} → Op₁ (Vec n)
+  negate = map s-
 
-  _·_ : ∀ {n} → Vec n → Vec n → Scalar
-  v · u = foldr _ _s+_ s0 (zipWith _s*_ v u)
+  _*_ : ∀ {n} → S → Vec n → Vec n
+  k * u = map (s* k) u
+
+  _·_ : ∀ {n} → Vec n → Vec n → S
+  v · u = foldr _ s+ s0 (zipWith s* v u)

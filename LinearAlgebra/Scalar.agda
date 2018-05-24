@@ -24,8 +24,9 @@ record IsScalar
   field
     +-isAbelianGroup : IsAbelianGroup _≡_ _+_ 0# -_
     *-isCommutativeMonoid : IsCommutativeMonoid _≡_ _*_ 1#
+    distrib : _DistributesOver_ _≡_ _*_ _+_
     *-inverseʳ : ∀ a → proj₁ a * proj₁ (a ⁻¹) ≡ 1#
-    ⁻¹-involutive : Involutive _≡_ _⁻¹
+    *-zero : Zero _≡_ 0# _*_
 
   open IsAbelianGroup +-isAbelianGroup public
     using ()

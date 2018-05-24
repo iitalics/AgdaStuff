@@ -13,7 +13,7 @@ module LinearAlgebra.Structures where
 
 record IsVectorSpace
     {c₁} (scalar : Scalar c₁)
-    {c₂} {V : Set c₂} (_+_ : Op₂ V) (negate : V → V) (v0 : V)
+    {c₂} {V : Set c₂} (_+_ : Op₂ V) (v0 : V) (negate : Op₁ V)
     (_*_ : Scalar.Carrier scalar → V → V)
     : Set (c₁ ⊔ c₂) where
 

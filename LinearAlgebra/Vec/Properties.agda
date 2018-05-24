@@ -4,34 +4,36 @@ open import Relation.Binary.PropositionalEquality as PE using (_≡_)
 open import Algebra.FunctionProperties
 open import Algebra.Structures
 
-open import LinearAlgebra using (VectorSpace)
-open import LinearAlgebra.Structures
+open import LinearAlgebra
 
 open import Data.Nat using (ℕ; suc; zero)
 open import Data.Product using (_,_; proj₁; proj₂)
-open import Data.Vec using (_∷_; [])
+open import Data.Vec using (_∷_; []; replicate; zipWith; map; foldr)
+
+import Data.Vec.Properties as VecP
 
 --------------------------------------------------------------------------
 -- Properties of n-dimensional vectors
 
 module LinearAlgebra.Vec.Properties
-  {c} {Scalar : Set c}
-  {_s+_ _s*_ : Op₂ Scalar}
-  {s0 s1 : Scalar}
-  (isScalar : IsScalar _s+_ _s*_ s0 s1)
+  {c} (scalar : Scalar c)
   where
 
-  open import LinearAlgebra.Vec _s+_ _s*_ s0 s1
+  open import LinearAlgebra.Vec scalar
 
-  open IsScalar isScalar
+  open Scalar scalar
     using ()
-    renaming ( +-assoc to s+-assoc
+    renaming ( Carrier to S
+             ; 0# to s0 ; 1# to s1
+             ; _+_ to _s+_
+             ; _*_ to _s*_
              ; +-identity to s+-identity
-             ; +-cong to s+-cong
+             ; +-inverse to s+-inverse
+             ; +-assoc to s+-assoc
              ; *-identity to s*-identity
-             ; zero to s*-zero
-             ; distrib to s*+-distrib )
-
+             ; *-zero to s*-zero
+             ; distrib to s*+-distrib
+             )
 
   -- Properties of vector _+_
 
@@ -41,43 +43,35 @@ module LinearAlgebra.Vec.Properties
 
   +-identityˡ : ∀ {n} → LeftIdentity _≡_ v0 (_+_ {n})
   +-identityʳ : ∀ {n} → RightIdentity _≡_ v0 (_+_ {n})
-  +-identityˡ [] = PE.refl
-  +-identityˡ (x ∷ v) = PE.cong₂ _∷_ (proj₁ s+-identity x) (+-identityˡ v)
-  +-identityʳ [] = PE.refl
-  +-identityʳ (x ∷ v) = PE.cong₂ _∷_ (proj₂ s+-identity x) (+-identityʳ v)
+  +-identityˡ v rewrite VecP.zipWith-replicate₁ _s+_ s0 v
+    = PE.trans (VecP.map-cong (proj₁ s+-identity) v) (VecP.map-id v)
+  +-identityʳ v rewrite VecP.zipWith-replicate₂ _s+_ v s0
+    = PE.trans (VecP.map-cong (proj₂ s+-identity) v) (VecP.map-id v)
 
+  +-inverseˡ : ∀ {n} → LeftInverse _≡_ v0 (negate {n}) _+_
+  +-inverseʳ : ∀ {n} → RightInverse _≡_ v0 (negate {n}) _+_
+  +-inverseˡ [] = PE.refl
+  +-inverseˡ (x ∷ xs) = PE.cong₂ _∷_ (proj₁ s+-inverse x) (+-inverseˡ xs)
+  +-inverseʳ [] = PE.refl
+  +-inverseʳ (x ∷ xs) = PE.cong₂ _∷_ (proj₂ s+-inverse x) (+-inverseʳ xs)
 
   -- Properties of scalar _*_
 
+  *-identityˡ : ∀ {n} (v : Vec n) → s1 * v ≡ v
+  *-identityˡ v rewrite VecP.map-cong (proj₁ s*-identity) v = VecP.map-id v
+
   *-zeroˡ : ∀ {n} (v : Vec n) → s0 * v ≡ v0
-  *-zeroʳ : ∀ n (k : Scalar) → k * (v0 {n}) ≡ v0
   *-zeroˡ [] = PE.refl
   *-zeroˡ (x ∷ v) = PE.cong₂ _∷_ (proj₁ s*-zero x) (*-zeroˡ v)
-  *-zeroʳ zero k = PE.refl
-  *-zeroʳ (suc n) k = PE.cong₂ _∷_ (proj₂ s*-zero k) (*-zeroʳ n k)
-
-  *-identityˡ : ∀ {n} (v : Vec n) → s1 * v ≡ v
-  *-identityˡ [] = PE.refl
-  *-identityˡ (x ∷ v) = PE.cong₂ _∷_ (proj₁ s*-identity x) (*-identityˡ v)
-
 
   -- Properties of _*_ and _+_
 
-  private
-    0+0=0 : s0 s+ s0 ≡ s0
-    0+0=0 = proj₁ s+-identity s0
-
-  *+-distribˡ : ∀ {n} (k : Scalar) (v u : Vec n) → k * (v + u) ≡ (k * v) + (k * u)
+  *+-distribˡ : ∀ {n} (k : S) (v u : Vec n) → k * (v + u) ≡ (k * v) + (k * u)
   *+-distribˡ k [] [] = PE.refl
   *+-distribˡ k (x ∷ v) (y ∷ u) = PE.cong₂ _∷_ (proj₁ s*+-distrib k x y) (*+-distribˡ k v u)
-
-  ·-zeroˡ : ∀ {n} (v : Vec n) → v0 · v ≡ s0
-  ·-zeroʳ : ∀ {n} (v : Vec n) → v · v0 ≡ s0
-  ·-zeroˡ [] = PE.refl
-  ·-zeroˡ (x ∷ v) rewrite proj₁ s*-zero x | ·-zeroˡ v = 0+0=0
-  ·-zeroʳ [] = PE.refl
-  ·-zeroʳ (x ∷ v) rewrite proj₂ s*-zero x | ·-zeroʳ v = 0+0=0
-
+  *+-distribʳ : ∀ {n} (k j : S) (v : Vec n) → (k s+ j) * v ≡ (k * v) + (j * v)
+  *+-distribʳ k j [] = PE.refl
+  *+-distribʳ k j (x ∷ v) = PE.cong₂ _∷_ (proj₂ s*+-distrib x k j) (*+-distribʳ k j v)
 
   -- Algebra structures
 
@@ -92,12 +86,19 @@ module LinearAlgebra.Vec.Properties
     { isSemigroup = +-isSemigroup n
     ; identity = +-identityˡ , +-identityʳ }
 
-  isVectorSpace : ∀ n →
-    IsVectorSpace {V = Vec n} _s+_ _s*_ _+_ _*_ s0 s1 v0
+  +-isGroup : ∀ n → IsGroup (_≡_ {A = Vec n}) _+_ v0 negate
+  +-isGroup n = record
+    { isMonoid = +-isMonoid n
+    ; inverse = +-inverseˡ , +-inverseʳ
+    ; ⁻¹-cong = PE.cong _ }
+
+  isVectorSpace : ∀ n → IsVectorSpace scalar {V = Vec n} _+_ v0 negate _*_
   isVectorSpace n = record
-    { scalarIsScalar = isScalar
-    ; vectorIsMonoid = +-isMonoid n
+    { vectorIsGroup = +-isGroup n
     ; distribˡ = *+-distribˡ
+    ; distribʳ = *+-distribʳ
     ; *-identityˡ = *-identityˡ
-    ; *-zeroˡ = *-zeroˡ
-    ; *-zeroʳ = *-zeroʳ n }
+    ; *-zeroˡ = *-zeroˡ }
+
+  vectorSpace : ∀ n → VectorSpace _ _
+  vectorSpace n = record { isVectorSpace = isVectorSpace n }
