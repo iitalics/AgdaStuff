@@ -29,9 +29,11 @@ module LinearAlgebra.Vec.Properties
              ; _*_ to _s*_
              ; +-identity to s+-identity
              ; +-assoc to s+-assoc
-             ; -1*-inverse to s-1*-inverse
+             ; +-isCommutativeMonoid to s+-isComMonoid
              ; *-identity to s*-identity
              ; *-assoc to s*-assoc
+             ; *-comm to s*-comm
+             ; -1*-inverse to s-1*-inverse
              ; zero to s*-zero
              ; distrib to s*+-distrib )
 
@@ -76,6 +78,41 @@ module LinearAlgebra.Vec.Properties
   distribˡ k (x ∷ v) (y ∷ u) = PE.cong₂ _∷_ (proj₁ s*+-distrib k x y) (distribˡ k v u)
   distribʳ k j [] = PE.refl
   distribʳ k j (x ∷ v) = PE.cong₂ _∷_ (proj₂ s*+-distrib x k j) (distribʳ k j v)
+
+  -- Properties of scalar _·_
+
+  ·-comm : ∀ {n} (v u : Vec n) → (v · u) ≡ (u · v)
+  ·-comm [] [] = PE.refl
+  ·-comm (x ∷ v) (y ∷ u) = PE.cong₂ _s+_ (s*-comm x y) (·-comm v u)
+
+  ·-assoc : ∀ {n} (k : S) (v u : Vec n) → (k * v) · u ≡ k s* (v · u)
+  ·-assoc k [] [] = PE.sym $ proj₂ s*-zero k
+  ·-assoc k (x ∷ v) (y ∷ u) = begin
+      (k * (x ∷ v)) · (y ∷ u)           ≡⟨⟩
+      ((k s* x) s* y) s+ ((k * v) · u)  ≡⟨ PE.cong₂ _s+_ (s*-assoc k x y) (·-assoc k v u) ⟩
+      (k s* (x s* y)) s+ (k s* (v · u)) ≡⟨ PE.sym (proj₁ s*+-distrib k _ _) ⟩
+      k s* ((x ∷ v) · (y ∷ u)) ∎
+    where open PE.≡-Reasoning
+
+  ·-distribˡ : ∀ {n} (w v u : Vec n) → w · (v + u) ≡ (w · v) s+ (w · u)
+  ·-distribˡ [] [] [] = PE.sym $ proj₁ s+-identity s0
+  ·-distribˡ (x ∷ w) (y ∷ v) (z ∷ u)
+    rewrite proj₁ s*+-distrib x y z
+    | ·-distribˡ w v u
+    = solve 4 (λ y z v u →
+        (y ⊕ z) ⊕ (v ⊕ u) ⊜ (y ⊕ v) ⊕ (z ⊕ u))
+      PE.refl (x s* y) (x s* z) (w · v) (w · u)
+    where
+      open import Algebra.CommutativeMonoidSolver
+        (record { isCommutativeMonoid = s+-isComMonoid })
+
+  ·-distribʳ : ∀ {n} (w v u : Vec n) → (v + u) · w ≡ (v · w) s+ (u · w)
+  ·-distribʳ w v u = begin
+      (v + u) · w         ≡⟨ ·-comm (v + u) w ⟩
+      w · (v + u)         ≡⟨ ·-distribˡ w v u ⟩
+      (w · v) s+ (w · u)  ≡⟨ PE.cong₂ _s+_ (·-comm w v) (·-comm w u) ⟩
+      (v · w) s+ (u · w) ∎
+    where open PE.≡-Reasoning
 
   -- Algebra structures
 

@@ -38,6 +38,12 @@ record IsScalar
           ; zero
           ; distrib )
 
+  +-isCommutativeMonoid : IsCommutativeMonoid _≡_ _+_ 0#
+  +-isCommutativeMonoid = record
+    { isSemigroup = IsMonoid.isSemigroup +-isMonoid
+    ; identityˡ = proj₁ +-identity
+    ; comm = +-comm }
+
   *-inverseˡ : ∀ a → proj₁ (a ⁻¹) * proj₁ a ≡ 1#
   *-inverseˡ (x , x≠0) =
     begin
