@@ -12,7 +12,6 @@ module LinearAlgebra.Scalar where
 NotEqual : ∀ {c} {A : Set c} (x : A) → Set c
 NotEqual x = ∃ (_≢_ x)
 
-
 -- Scalar fields
 
 record IsScalar
@@ -22,24 +21,22 @@ record IsScalar
   : Set c where
 
   field
-    +-isAbelianGroup : IsAbelianGroup _≡_ _+_ 0# -_
-    *-isCommutativeMonoid : IsCommutativeMonoid _≡_ _*_ 1#
-    distrib : _DistributesOver_ _≡_ _*_ _+_
+    isCommutativeRing : IsCommutativeRing _≡_ _+_ _*_ -_ 0# 1#
     *-inverseʳ : ∀ a → proj₁ a * proj₁ (a ⁻¹) ≡ 1#
-    *-zero : Zero _≡_ 0# _*_
 
-  open IsAbelianGroup +-isAbelianGroup public
-    using ()
-    renaming ( identity to +-identity
-             ; assoc to +-assoc
-             ; inverse to +-inverse
-             ; comm to +-comm )
-
-  open IsCommutativeMonoid *-isCommutativeMonoid public
-    using ()
-    renaming ( identity to *-identity
-             ; assoc to *-assoc
-             ; comm to *-comm )
+  open IsCommutativeRing isCommutativeRing public
+    using ( +-identity
+          ; +-assoc
+          ; -‿inverse
+          ; +-comm
+          ; +-isGroup
+          ; +-isMonoid
+          ; *-identity
+          ; *-assoc
+          ; *-comm
+          ; *-isMonoid
+          ; zero
+          ; distrib )
 
   *-inverseˡ : ∀ a → proj₁ (a ⁻¹) * proj₁ a ≡ 1#
   *-inverseˡ (x , x≠0) =
@@ -49,8 +46,7 @@ record IsScalar
       1# ∎
     where open PE.≡-Reasoning
 
-
--- Scalar field record
+-- Scalar type
 
 record Scalar c : Set (Level.suc c) where
   field

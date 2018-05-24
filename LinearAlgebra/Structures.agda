@@ -31,11 +31,11 @@ record IsVectorSpace
 
   field
     vectorIsGroup : IsGroup _≡_ _+_ v0 negate
+    *-identityˡ : ∀ u → s1 * u ≡ u
+    *-assoc : ∀ j k v → (j s* k) * v ≡ j * (k * v)
     distribˡ : ∀ k v u → k * (v + u) ≡ (k * v) + (k * u)
     distribʳ : ∀ j k v → (j s+ k) * v ≡ (j * v) + (k * v)
-    *-identityˡ : ∀ u → s1 * u ≡ u
-    *-zeroˡ : ∀ u → s0 * u ≡ v0
-    *-assoc : ∀ j k v → (j s* k) * v ≡ j * (k * v)
+    zeroˡ : ∀ u → s0 * u ≡ v0
 
   open IsGroup vectorIsGroup public
     using ()

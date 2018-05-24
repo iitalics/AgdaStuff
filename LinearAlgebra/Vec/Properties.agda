@@ -28,12 +28,12 @@ module LinearAlgebra.Vec.Properties
              ; _+_ to _s+_
              ; _*_ to _s*_
              ; +-identity to s+-identity
-             ; +-inverse to s+-inverse
              ; +-assoc to s+-assoc
+             ; -‿inverse to s+-inverse
              ; *-identity to s*-identity
-             ; *-zero to s*-zero
-             ; distrib to s*+-distrib
-             )
+             ; *-assoc to s*-assoc
+             ; zero to s*-zero
+             ; distrib to s*+-distrib )
 
   -- Properties of vector _+_
 
@@ -60,18 +60,22 @@ module LinearAlgebra.Vec.Properties
   *-identityˡ : ∀ {n} (v : Vec n) → s1 * v ≡ v
   *-identityˡ v rewrite VecP.map-cong (proj₁ s*-identity) v = VecP.map-id v
 
-  *-zeroˡ : ∀ {n} (v : Vec n) → s0 * v ≡ v0
-  *-zeroˡ [] = PE.refl
-  *-zeroˡ (x ∷ v) = PE.cong₂ _∷_ (proj₁ s*-zero x) (*-zeroˡ v)
+  *-assoc : ∀ {n} (k j : S) (v : Vec n) → (k s* j) * v ≡ k * (j * v)
+  *-assoc k j [] = PE.refl
+  *-assoc k j (x ∷ v) = PE.cong₂ _∷_ (s*-assoc k j x) (*-assoc k j v)
+
+  zeroˡ : ∀ {n} (v : Vec n) → s0 * v ≡ v0
+  zeroˡ [] = PE.refl
+  zeroˡ (x ∷ v) = PE.cong₂ _∷_ (proj₁ s*-zero x) (zeroˡ v)
 
   -- Properties of _*_ and _+_
 
-  *+-distribˡ : ∀ {n} (k : S) (v u : Vec n) → k * (v + u) ≡ (k * v) + (k * u)
-  *+-distribˡ k [] [] = PE.refl
-  *+-distribˡ k (x ∷ v) (y ∷ u) = PE.cong₂ _∷_ (proj₁ s*+-distrib k x y) (*+-distribˡ k v u)
-  *+-distribʳ : ∀ {n} (k j : S) (v : Vec n) → (k s+ j) * v ≡ (k * v) + (j * v)
-  *+-distribʳ k j [] = PE.refl
-  *+-distribʳ k j (x ∷ v) = PE.cong₂ _∷_ (proj₂ s*+-distrib x k j) (*+-distribʳ k j v)
+  distribˡ : ∀ {n} (k : S) (v u : Vec n) → k * (v + u) ≡ (k * v) + (k * u)
+  distribˡ k [] [] = PE.refl
+  distribˡ k (x ∷ v) (y ∷ u) = PE.cong₂ _∷_ (proj₁ s*+-distrib k x y) (distribˡ k v u)
+  distribʳ : ∀ {n} (k j : S) (v : Vec n) → (k s+ j) * v ≡ (k * v) + (j * v)
+  distribʳ k j [] = PE.refl
+  distribʳ k j (x ∷ v) = PE.cong₂ _∷_ (proj₂ s*+-distrib x k j) (distribʳ k j v)
 
   -- Algebra structures
 
@@ -95,10 +99,11 @@ module LinearAlgebra.Vec.Properties
   isVectorSpace : ∀ n → IsVectorSpace scalar {V = Vec n} _+_ v0 negate _*_
   isVectorSpace n = record
     { vectorIsGroup = +-isGroup n
-    ; distribˡ = *+-distribˡ
-    ; distribʳ = *+-distribʳ
     ; *-identityˡ = *-identityˡ
-    ; *-zeroˡ = *-zeroˡ }
+    ; *-assoc = *-assoc
+    ; distribˡ = distribˡ
+    ; distribʳ = distribʳ
+    ; zeroˡ = zeroˡ }
 
   vectorSpace : ∀ n → VectorSpace _ _
   vectorSpace n = record { isVectorSpace = isVectorSpace n }
