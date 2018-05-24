@@ -1,21 +1,21 @@
 open import Level using (suc; _⊔_)
 open import Algebra.FunctionProperties.Core
 
-open import LinearAlgebra.Structures
-
 module LinearAlgebra where
+
+open import LinearAlgebra.Structures public
+open import LinearAlgebra.Scalar public
 
 -- Vector space
 
 record VectorSpace c₁ c₂ : Set (suc (c₁ ⊔ c₂)) where
   field
-    Scalar : Set c₁
+    scalar : Scalar c₁
     Vector : Set c₂
-    _s+_ _s*_ : Op₂ Scalar
     _+_ : Op₂ Vector
-    _*_ : Scalar → Vector → Vector
-    s0 s1 : Scalar
+    negate : Vector → Vector
     v0 : Vector
-    isVectorSpace : IsVectorSpace _s+_ _s*_ _+_ _*_ s0 s1 v0
+    _*_ : Scalar.Carrier scalar → Vector → Vector
+    isVectorSpace : IsVectorSpace scalar _+_ negate v0 _*_
 
   open IsVectorSpace isVectorSpace public
