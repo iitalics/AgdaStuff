@@ -6,11 +6,14 @@ open import Algebra.Structures
 
 open import LinearAlgebra
 
-open import Data.Nat using (ℕ)
+open import Data.Nat using (ℕ; suc)
+open import Data.Fin using (Fin)
+open import Data.Vec using (_∷_; []; replicate; zipWith; map; foldr; lookup)
 open import Data.Product using (_,_; proj₁; proj₂)
-open import Data.Vec using (_∷_; []; replicate; zipWith; map; foldr)
 
 import Data.Vec.Properties as VecP
+
+open PE.≡-Reasoning
 
 --------------------------------------------------------------------------
 -- Properties of n-dimensional vectors
@@ -92,15 +95,17 @@ module LinearAlgebra.Vec.Properties
       ((k s* x) s* y) s+ ((k * v) · u)  ≡⟨ PE.cong₂ _s+_ (s*-assoc k x y) (·-assoc k v u) ⟩
       (k s* (x s* y)) s+ (k s* (v · u)) ≡⟨ PE.sym (proj₁ s*+-distrib k _ _) ⟩
       k s* ((x ∷ v) · (y ∷ u)) ∎
-    where open PE.≡-Reasoning
 
   ·-distribˡ : ∀ {n} (w v u : Vec n) → w · (v + u) ≡ (w · v) s+ (w · u)
   ·-distribˡ [] [] [] = PE.sym $ proj₁ s+-identity s0
   ·-distribˡ (x ∷ w) (y ∷ v) (z ∷ u)
-    rewrite proj₁ s*+-distrib x y z
+    rewrite
+      proj₁ s*+-distrib x y z
     | ·-distribˡ w v u
     = solve 4 (λ y z v u →
-        (y ⊕ z) ⊕ (v ⊕ u) ⊜ (y ⊕ v) ⊕ (z ⊕ u))
+        (y ⊕ z) ⊕ (v ⊕ u)
+          ⊜
+        (y ⊕ v) ⊕ (z ⊕ u))
       PE.refl (x s* y) (x s* z) (w · v) (w · u)
     where
       open import Algebra.CommutativeMonoidSolver
@@ -112,7 +117,30 @@ module LinearAlgebra.Vec.Properties
       w · (v + u)         ≡⟨ ·-distribˡ w v u ⟩
       (w · v) s+ (w · u)  ≡⟨ PE.cong₂ _s+_ (·-comm w v) (·-comm w u) ⟩
       (v · w) s+ (u · w) ∎
-    where open PE.≡-Reasoning
+
+  ·-zeroʳ : ∀ {n} (v : Vec n) → (v · v0) ≡ s0
+  ·-zeroʳ [] = PE.refl
+  ·-zeroʳ (x ∷ v) = begin
+      (x s* s0) s+ (v · v0) ≡⟨ PE.cong₂ _s+_ (proj₂ s*-zero x) (·-zeroʳ v) ⟩
+      s0 s+ s0              ≡⟨ proj₁ s+-identity s0 ⟩
+      s0 ∎
+
+  ·-zeroˡ : ∀ {n} (v : Vec n) → (v0 · v) ≡ s0
+  ·-zeroˡ v rewrite ·-comm v0 v = ·-zeroʳ v
+
+  -- Properties of essential
+
+  essential-lookup : ∀ {n} (i : Fin n) (v : Vec n) → v · essential i ≡ lookup i v
+  essential-lookup Fin.zero (x ∷ v)
+    rewrite PE.cong₂ _s+_ (proj₂ s*-identity x) (·-zeroʳ v)
+    = proj₂ s+-identity x
+  essential-lookup (Fin.suc i) (x ∷ v) =
+    let recur = v · essential i in
+    begin
+      (x s* s0) s+ recur ≡⟨ PE.cong (_s+ recur) (proj₂ s*-zero x) ⟩
+      s0 s+ recur        ≡⟨ proj₁ s+-identity recur ⟩
+      recur              ≡⟨ essential-lookup i v ⟩
+      lookup i v ∎
 
   -- Algebra structures
 

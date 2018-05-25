@@ -4,7 +4,7 @@ open import Algebra.FunctionProperties.Core
 open import LinearAlgebra.Scalar
 
 open import Data.Nat using (ℕ)
-open import Data.Fin using (Fin)
+open import Data.Fin using (Fin; compare; equal; less; greater)
 open import Data.Vec
   using ( _∷_; []; replicate; map; foldr; zipWith; tabulate)
   renaming (Vec to BaseVec)
@@ -53,13 +53,7 @@ module _ {n} where
   _·_ : Vec n → Vec n → S
   v · u = foldr _ s+ s0 (zipWith s* v u)
 
-  -- essential vector (e.g. column in identity matrix)
-  essential : Fin n → Vec n
-  essential i = tabulate f
-    where
-      open Data.Fin using (compare; equal; less; greater)
-      f : Fin n → S
-      f j with compare i j
-      ... | equal _     = s1
-      ... | less _ _    = s0
-      ... | greater _ _ = s0
+-- essential vector (e.g. column in identity matrix)
+essential : ∀ {n} → Fin n → Vec n
+essential Fin.zero    = s1 ∷ v0
+essential (Fin.suc i) = s0 ∷ essential i
