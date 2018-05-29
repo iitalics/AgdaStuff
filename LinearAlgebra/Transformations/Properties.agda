@@ -2,6 +2,7 @@ open import Level using (Level; _⊔_)
 open import Function
 open import Algebra.FunctionProperties.Core
 open import Relation.Binary.PropositionalEquality as PE using (_≡_)
+open PE.≡-Reasoning
 
 open import LinearAlgebra
 import LinearAlgebra.Transformations
@@ -29,8 +30,6 @@ module LinearAlgebra.Transformations.Properties
           (j s* k) * v   ≡⟨ *-assoc j k v ⟩
           j * (k * v) ∎
       ; sum = distribˡ k }
-      where
-        open PE.≡-Reasoning
 
     negate-is-linear : IsLinearFn negate
     negate-is-linear = scale-is-linear s-1
@@ -39,14 +38,17 @@ module LinearAlgebra.Transformations.Properties
       → IsLinearFn f
       → IsLinearFn g
       → IsLinearFn (f ∘ g)
-    ∘-is-linear {f} {g} f-lin g-lin = record
+    ∘-is-linear {f} {g}
+      record { scale = f-scale ; sum = f-sum }
+      record { scale = g-scale ; sum = g-sum }
+      = record
       { scale = λ k v → begin
-          f (g (k * v))   ≡⟨ PE.cong f (IsLinearFn.scale g-lin k v) ⟩
-          f (k * g v)     ≡⟨ IsLinearFn.scale f-lin k (g v) ⟩
+          f (g (k * v))   ≡⟨ PE.cong f (g-scale k v) ⟩
+          f (k * g v)     ≡⟨ f-scale k (g v) ⟩
           k * f (g v) ∎
       ; sum = λ v u → begin
-          f (g (v + u))   ≡⟨ PE.cong f (IsLinearFn.sum g-lin v u) ⟩
-          f (g v + g u)   ≡⟨ IsLinearFn.sum f-lin (g v) (g u) ⟩
+          f (g (v + u))   ≡⟨ PE.cong f (g-sum v u) ⟩
+          f (g v + g u)   ≡⟨ f-sum (g v) (g u) ⟩
           f (g v) + f (g u) ∎ }
-      where
-        open PE.≡-Reasoning
+
+  open One

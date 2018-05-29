@@ -10,7 +10,7 @@ module LinearAlgebra.Scalar where
 -- Values not equal to some value (for instance, zero)
 
 NotEqual : ∀ {c} {A : Set c} (x : A) → Set c
-NotEqual x = ∃ (_≢_ x)
+NotEqual x = ∃ (x ≢_)
 
 -- Scalar fields
 
@@ -35,6 +35,7 @@ record IsScalar
           ; *-assoc
           ; *-comm
           ; *-isMonoid
+          ; *-isCommutativeMonoid
           ; zero
           ; distrib )
 

@@ -24,10 +24,10 @@ module LinearAlgebra.Transformations
   --------------------------------------------------
   -- Linear functions
 
-  record IsLinearFn (f : V → U) : Set (s ⊔ c₁ ⊔ c₂) where
+  record IsLinearFn (T : V → U) : Set (s ⊔ c₁ ⊔ c₂) where
     field
-      scale : LinearScale _v*_ _u*_ f
-      sum : LinearSum _v+_ _u+_ f
+      scale : LinearScale _v*_ _u*_ T
+      sum : LinearSum _v+_ _u+_ T
 
   record LinearFn : Set (Level.suc (s ⊔ c₁ ⊔ c₂)) where
     field
@@ -35,11 +35,8 @@ module LinearAlgebra.Transformations
       isLinearFn : IsLinearFn apply
 
   --------------------------------------------------
-  -- Kernels
+  -- Kernels of transformations
 
-  record Kernel (f : V → U) (v : V) : Set c₂ where
+  record Kernel (T : V → U) (v : V) : Set c₂ where
     field
-      prop : f v ≡ u0
-
-  IsTrivial : ∀ {a} → Pred (Pred V a) _
-  IsTrivial P = ∀ v → (P v ↔ v ≡ v0)
+      prop : T v ≡ u0
