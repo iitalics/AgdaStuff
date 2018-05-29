@@ -174,3 +174,6 @@ module LinearAlgebra.Vec.Properties
 
     vectorSpace : VectorSpace _ _
     vectorSpace = record { isVectorSpace = isVectorSpace }
+
+    vectorSpaceOver : VectorSpaceOver scalar _
+    vectorSpaceOver = record { isVectorSpace = isVectorSpace }

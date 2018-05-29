@@ -14,7 +14,7 @@ module LinearAlgebra.Transformations.Properties
     where
 
     open VectorSpace vectorSpace
-    open LinearAlgebra.Transformations _+_ _*_ _+_ _*_
+    open LinearAlgebra.Transformations vectorSpaceOver vectorSpaceOver
 
     id-is-linear : IsLinearFn id
     id-is-linear = record

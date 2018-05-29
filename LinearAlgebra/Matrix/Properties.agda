@@ -63,12 +63,12 @@ private
 module _ {n m} where
 
   open import LinearAlgebra.Transformations
-    (_+_ {m}) _*_
-    (_+_ {n}) _*_
+    (VecP.vectorSpaceOver m)
+    (VecP.vectorSpaceOver n)
 
   -- Applying a matrix is a linear operation
 
-  apply-isLinear : ∀ A → IsLinearFn (apply A)
+  apply-isLinear : ∀ (A : Mat n m) → IsLinearFn (apply A)
   apply-isLinear A = record
     { scale = λ k v → begin
         apply A (k * v)                   ≡⟨⟩
@@ -97,6 +97,6 @@ m1-identity n v = begin
   apply m1 v                        ≡⟨⟩
   map (v ·_) (tabulate essential)   ≡⟨ PE.sym $ BaseVecP.tabulate-∘ (v ·_) essential ⟩
   tabulate (λ i → v · essential i)  ≡⟨ tabulate-cong _ (flip lookup v)
-                                        (flip VecP.essential-lookup v) ⟩
+                                        $ flip VecP.essential-lookup v ⟩
   tabulate (flip lookup v)          ≡⟨ BaseVecP.tabulate∘lookup v ⟩
   v ∎
