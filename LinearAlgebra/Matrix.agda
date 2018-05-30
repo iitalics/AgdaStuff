@@ -1,12 +1,12 @@
 open import Function
 open import Algebra.FunctionProperties.Core
 
-open import LinearAlgebra.Scalar
-
 open import Data.Nat using (ℕ)
 open import Data.Vec
   using ( _∷_; []; map; replicate; zipWith; foldr; tabulate )
   renaming (Vec to BaseVec)
+
+open import LinearAlgebra.Scalar
 
 --------------------------------------------------------------------------
 -- Matrices as 2-dimensional vector of scalars
