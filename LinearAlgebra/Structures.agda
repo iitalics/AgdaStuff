@@ -4,6 +4,9 @@ open import Algebra.FunctionProperties.Core
 open import Relation.Binary.PropositionalEquality as PE using (_≡_)
 open import Relation.Unary using (Pred) renaming (Decidable to UDec)
 
+open PE.≡-Reasoning
+open import Data.Product using (proj₁; proj₂)
+
 open import LinearAlgebra.Scalar
 
 module LinearAlgebra.Structures where
@@ -38,6 +41,9 @@ record IsVectorSpace
   negate : Op₁ V
   negate v = s-1 * v
 
+  _-_ : Op₂ V
+  v - u = v + negate u
+
   field
     +-isGroup : IsGroup _≡_ _+_ v0 negate
     *-identityˡ : ∀ u → s1 * u ≡ u
@@ -51,3 +57,14 @@ record IsVectorSpace
     renaming ( assoc to +-assoc
              ; identity to +-identity
              ; inverse to +-inverse )
+
+  from-+-zeroˡ : ∀ w u
+    → (u + w ≡ w)
+    → u ≡ v0
+  from-+-zeroˡ w u u-zeroˡ = PE.sym (begin
+    v0              ≡⟨ PE.sym (proj₂ +-inverse w) ⟩
+    w - w           ≡⟨ PE.cong (_- w) (PE.sym u-zeroˡ) ⟩
+    (u + w) - w     ≡⟨ +-assoc u w (negate w) ⟩
+    u + (w - w)     ≡⟨ PE.cong (u +_) (proj₂ +-inverse w) ⟩
+    u + v0          ≡⟨ proj₂ +-identity u ⟩
+    u ∎)

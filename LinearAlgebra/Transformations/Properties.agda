@@ -4,8 +4,8 @@ open import Algebra.FunctionProperties.Core
 open import Relation.Binary.PropositionalEquality as PE using (_≡_)
 open PE.≡-Reasoning
 
-open import Data.Vec
-  using (Vec; []; _∷_; zipWith; map; foldr; foldl)
+open import Data.Product using (proj₁; proj₂)
+open import Data.Vec using (Vec; []; _∷_; zipWith; map; foldr; foldl)
 
 open import LinearAlgebra
 open import LinearAlgebra.Transformations.Core
@@ -63,18 +63,36 @@ module LinearAlgebra.Transformations.Properties
     where
 
     open Scalar scalar
+      using ()
       renaming (Carrier to S)
 
     open VectorSpaceOver space₁
       using ()
-      renaming (V to V₁ ; _+_ to _+₁_ ; _*_ to _*₁_ )
+      renaming (V to V₁ ; v0 to v0₁ ; _+_ to _+₁_ ; _*_ to _*₁_ )
 
     open VectorSpaceOver space₂
       using ()
-      renaming (V to V₂ ; _+_ to _+₂_ ; _*_ to _*₂_)
+      renaming (V to V₂ ; v0 to v0₂ ; _+_ to _+₂_ ; _*_ to _*₂_)
 
+    import LinearAlgebra.Vec scalar as LAVec
+    open LAVec.Combination space₁ using () renaming (combine to combine₁)
+    open LAVec.Combination space₂ using () renaming (combine to combine₂)
 
-    -- LinearScale can be lifted out of map / zipWith
+    -- T preserves the origin
+
+    transform-zero : (T : V₁ → V₂)
+      → LinearSum _+₁_ _+₂_ T
+      → T v0₁ ≡ v0₂
+    transform-zero T T-sum =
+      from-+-zeroˡ (T v0₁) (T v0₁) (begin
+        T v0₁ +₂ T _    ≡⟨ PE.sym (T-sum v0₁ _) ⟩
+        T (v0₁ +₁ _)    ≡⟨ PE.cong T (proj₁ +-identity _) ⟩
+        T _ ∎)
+      where
+        open VectorSpaceOver space₁ using (+-identity)
+        open VectorSpaceOver space₂ using (from-+-zeroˡ)
+
+    -- T can be lifted out of map / zipWith
 
     map-linear-scale : (T : V₁ → V₂)
       → LinearScale _*₁_ _*₂_ T
@@ -84,7 +102,7 @@ module LinearAlgebra.Transformations.Properties
     map-linear-scale T T-scale (x ∷ xs) (v ∷ vs) =
       PE.cong₂ _∷_ (T-scale x v) (map-linear-scale _ T-scale xs vs)
 
-    -- LinearSum can be lifted out of foldr
+    -- T can be lifted out of foldr
 
     foldr-linear-sum : (T : V₁ → V₂)
       → LinearSum _+₁_ _+₂_ T
@@ -96,7 +114,7 @@ module LinearAlgebra.Transformations.Properties
       T v +₂ T (foldr _ _+₁_ i vs)   ≡⟨ PE.cong (T v +₂_) $ foldr-linear-sum _ T-sum i vs ⟩
       T v +₂ (foldr _ _+₂_ (T i) (map T vs)) ∎
 
-    -- LinearSum can be lifted out of foldl
+    -- T can be lifted out of foldl
 
     foldl-linear-sum : (T : V₁ → V₂)
       → LinearSum _+₁_ _+₂_ T
@@ -107,3 +125,16 @@ module LinearAlgebra.Transformations.Properties
       T (foldl _ _+₁_ (i +₁ v) vs)          ≡⟨ foldl-linear-sum _ T-sum (i +₁ v) vs ⟩
       foldl _ _+₂_ (T (i +₁ v)) (map T vs)  ≡⟨ PE.cong (λ x → foldl _ _ x (map T vs)) $ T-sum i v ⟩
       foldl _ _+₂_ (T i +₂ T v) (map T vs)  ∎
+
+    -- T can be lifted out of linear combination
+
+    combine-linear : (T : V₁ → V₂)
+      → LinearSum _+₁_ _+₂_ T
+      → LinearScale _*₁_ _*₂_ T
+      → ∀ {n} (xs : Vec S n) (vs : Vec V₁ n)
+      → T (combine₁ xs vs) ≡ combine₂ xs (map T vs)
+    combine-linear T T-sum T-scale xs vs rewrite
+      foldr-linear-sum T T-sum v0₁ (zipWith _*₁_ xs vs)
+      | map-linear-scale T T-scale xs vs
+      | transform-zero T T-sum
+      = PE.refl
