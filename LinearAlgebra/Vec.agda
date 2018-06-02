@@ -2,6 +2,7 @@ open import Function
 open import Algebra.FunctionProperties.Core
 
 open import LinearAlgebra.Scalar
+open import LinearAlgebra using (VectorSpaceOver)
 
 open import Data.Nat using (ℕ)
 open import Data.Fin using (Fin; compare; equal; less; greater)
@@ -57,3 +58,16 @@ module _ {n} where
 essential : ∀ {n} → Fin n → Vec n
 essential Fin.zero    = s1 ∷ v0
 essential (Fin.suc i) = s0 ∷ essential i
+
+-- linear combinations
+module Combination
+  {c₂} (space : VectorSpaceOver scalar c₂)
+  where
+
+  open VectorSpaceOver space
+    renaming ( V to U ; v0 to u0 ; _+_ to _u+_; _*_ to _u*_)
+
+  combine : ∀ {n} → Vec n → BaseVec U n → U
+  combine xs vs = foldr _ _u+_ u0 (zipWith _u*_ xs vs)
+
+open Combination public

@@ -26,7 +26,8 @@ open Scalar scalar
 open import LinearAlgebra.Vec scalar
   using ( Vec ; v0 ; essential ; _·_ )
   renaming ( _+_ to _v+_
-           ; _*_ to _v*_ )
+           ; _*_ to _v*_
+           ; combine to baseCombine )
 
 -- `Mat n m' is the type of matrices with `n' rows, `m' columns
 
@@ -50,3 +51,12 @@ transpose = foldr (Mat _) (zipWith _∷_) (replicate [])
 -- matrix application
 apply : ∀ {n m} → Mat n m → Vec m → Vec n
 apply m v = map (v ·_) m
+
+unapply : ∀ {n m} → (Vec m → Vec n) → Mat n m
+unapply T = transpose (map T m1)
+
+combine : ∀ {n m} → Vec m → BaseVec (Vec n) m → Vec n
+combine = baseCombine (vectorSpaceOver _)
+  where
+    open import LinearAlgebra.Vec.Properties scalar
+      using (vectorSpaceOver)
