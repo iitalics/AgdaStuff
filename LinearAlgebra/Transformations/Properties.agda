@@ -73,18 +73,19 @@ module Two
   open import LinearAlgebra.Transformations space₁ space₂ using (IsLinearFn)
 
   -- T preserves the origin
+  -- TODO: can this identity be proved with LinearScale as well?
 
   transform-zero : (T : V₁ → V₂)
     → LinearSum _+₁_ _+₂_ T
     → T v0₁ ≡ v0₂
   transform-zero T T-sum =
-    from-+-zeroˡ (T v0₁) (T v0₁) (begin
-      T v0₁ +₂ T _    ≡⟨ PE.sym (T-sum v0₁ _) ⟩
-      T (v0₁ +₁ _)    ≡⟨ PE.cong T (proj₁ +-identity _) ⟩
-      T _ ∎)
+    cancels→zero (T v0₁) (begin
+      T v0₁ +₂ T v0₁    ≡⟨ PE.sym (T-sum v0₁ v0₁) ⟩
+      T (v0₁ +₁ v0₁)    ≡⟨ PE.cong T (proj₁ +-identity v0₁) ⟩
+      T v0₁ ∎)
     where
       open VectorSpaceOver space₁ using (+-identity)
-      open VectorSpaceOver space₂ using (from-+-zeroˡ)
+      open VectorSpaceOver space₂ using (cancels→zero)
 
   -- T can be lifted out of map / zipWith
 

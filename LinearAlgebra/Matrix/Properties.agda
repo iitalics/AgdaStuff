@@ -159,7 +159,6 @@ module _ {n m : ℕ} where
         map (λ w → (v · w) s+ (u · w)) A  ≡⟨ Lemmas.map-on₂ (v ·_) (u ·_) _s+_ A ⟩
         apply A v + apply A u ∎ }
 
-
   -- Unapplying a linear transformation is equivalent to the transformation
 
   apply-unapply : ∀ T

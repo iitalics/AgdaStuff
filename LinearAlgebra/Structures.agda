@@ -58,13 +58,13 @@ record IsVectorSpace
              ; identity to +-identity
              ; inverse to +-inverse )
 
-  from-+-zeroˡ : ∀ w u
-    → (u + w ≡ w)
-    → u ≡ v0
-  from-+-zeroˡ w u u-zeroˡ = PE.sym (begin
-    v0              ≡⟨ PE.sym (proj₂ +-inverse w) ⟩
-    w - w           ≡⟨ PE.cong (_- w) (PE.sym u-zeroˡ) ⟩
-    (u + w) - w     ≡⟨ +-assoc u w (negate w) ⟩
-    u + (w - w)     ≡⟨ PE.cong (u +_) (proj₂ +-inverse w) ⟩
-    u + v0          ≡⟨ proj₂ +-identity u ⟩
-    u ∎)
+  cancels→zero : ∀ w
+    → (w + w ≡ w)
+    → w ≡ v0
+  cancels→zero w 2w=w = begin
+    w              ≡⟨ PE.sym (proj₂ +-identity w) ⟩
+    w + v0         ≡⟨ PE.cong (w +_) (PE.sym (proj₂ +-inverse w)) ⟩
+    w + (w - w)    ≡⟨ PE.sym (+-assoc w w (negate w)) ⟩
+    (w + w) - w    ≡⟨ PE.cong (_- w) 2w=w ⟩
+    w - w          ≡⟨ proj₂ +-inverse w ⟩
+    v0 ∎
