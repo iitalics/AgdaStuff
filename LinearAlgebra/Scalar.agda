@@ -4,6 +4,7 @@ open import Algebra.Structures
 open import Algebra.FunctionProperties
 open import Relation.Binary.PropositionalEquality as PE using (_≡_; _≢_)
 open import Data.Product using (∃; _,_; proj₁; proj₂)
+open PE.≡-Reasoning
 
 module LinearAlgebra.Scalar where
 
@@ -46,30 +47,29 @@ record IsScalar
     ; comm = +-comm }
 
   *-inverseˡ : ∀ a → proj₁ (a ⁻¹) * proj₁ a ≡ 1#
-  *-inverseˡ (x , x≠0) =
-    begin
-      (_ * x) ≡⟨ *-comm _ _ ⟩
-      (x * _) ≡⟨ *-inverseʳ _ ⟩
-      1# ∎
-    where open PE.≡-Reasoning
+  *-inverseˡ (x , x≠0) = begin
+    (_ * x) ≡⟨ *-comm _ _ ⟩
+    (x * _) ≡⟨ *-inverseʳ _ ⟩
+    1# ∎
 
   -1# = - 1#
 
+  -- (-1 * x) as the inverse of x
   private
     -1*-inverseˡ : LeftInverse _≡_ 0# (-1# *_) _+_
-    -1*-inverseˡ x =
-      begin
-        (-1# * x) + x        ≡⟨ PE.cong₂ _+_ (*-comm _ _)
-                                 (PE.sym $ proj₂ *-identity x) ⟩
-        (x * -1#) + (x * 1#) ≡⟨ PE.sym $ proj₁ distrib x -1# 1# ⟩
-        x * (-1# + 1#)       ≡⟨ PE.cong (x *_) $ proj₁ -‿inverse 1# ⟩
-        x * 0#               ≡⟨ proj₂ zero x ⟩
-        0# ∎
-      where open PE.≡-Reasoning
+    -1*-inverseˡ x = begin
+      (-1# * x) + x        ≡⟨ PE.cong₂ _+_ (*-comm _ _)
+                               (PE.sym $ proj₂ *-identity x) ⟩
+      (x * -1#) + (x * 1#) ≡⟨ PE.sym $ proj₁ distrib x -1# 1# ⟩
+      x * (-1# + 1#)       ≡⟨ PE.cong (x *_) $ proj₁ -‿inverse 1# ⟩
+      x * 0#               ≡⟨ proj₂ zero x ⟩
+      0# ∎
+
+    -1*-inverseʳ : RightInverse _≡_ 0# (-1# *_) _+_
+    -1*-inverseʳ = PE.trans (+-comm _ _) ∘ -1*-inverseˡ
 
   -1*-inverse : Inverse _≡_ 0# (-1# *_) _+_
-  -1*-inverse = -1*-inverseˡ
-    , λ x → PE.trans (+-comm _ _) (-1*-inverseˡ x)
+  -1*-inverse = -1*-inverseˡ , -1*-inverseʳ
 
 -- Scalar type
 
