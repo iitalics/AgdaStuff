@@ -73,6 +73,12 @@ module LinearAlgebra.Vec.Properties
   zeroˡ [] = PE.refl
   zeroˡ (x ∷ v) = PE.cong₂ _∷_ (proj₁ s*-zero x) (zeroˡ v)
 
+  zeroʳ : ∀ {n} (k : S) → k * v0 ≡ v0 {n}
+  zeroʳ {n} k = begin
+    map (k s*_) v0       ≡⟨ VecP.map-replicate (k s*_) s0 n ⟩
+    replicate (k s* s0)  ≡⟨ PE.cong replicate (proj₂ s*-zero k) ⟩
+    replicate s0 ∎
+
   -- Properties of _*_ and _+_
 
   distribˡ : ∀ {n} (k : S) (v u : Vec n) → k * (v + u) ≡ (k * v) + (k * u)
@@ -170,7 +176,8 @@ module LinearAlgebra.Vec.Properties
       ; *-assoc = *-assoc
       ; distribˡ = distribˡ
       ; distribʳ = distribʳ
-      ; zeroˡ = zeroˡ }
+      ; zeroˡ = zeroˡ
+      ; zeroʳ = zeroʳ }
 
     vectorSpace : VectorSpace _ _
     vectorSpace = record { isVectorSpace = isVectorSpace }

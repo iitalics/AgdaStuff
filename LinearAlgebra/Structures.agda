@@ -51,6 +51,7 @@ record IsVectorSpace
     distribˡ : ∀ k v u → k * (v + u) ≡ (k * v) + (k * u)
     distribʳ : ∀ j k v → (j s+ k) * v ≡ (j * v) + (k * v)
     zeroˡ : ∀ u → s0 * u ≡ v0
+    zeroʳ : ∀ k → k * v0 ≡ v0
 
   open IsGroup +-isGroup public
     using ()
