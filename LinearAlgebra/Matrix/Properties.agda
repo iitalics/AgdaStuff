@@ -9,10 +9,11 @@ open import LinearAlgebra.Scalar
 open import Data.Nat using (ℕ; suc)
 open import Data.Fin using (Fin; suc; zero)
 open import Data.Vec
-  using ( _∷_; []; map; replicate; zipWith; foldr; tabulate; lookup)
+  using ( _∷_; []; map; replicate; zipWith; foldr; tabulate; lookup; tail)
   renaming (Vec to BaseVec)
 
 import Data.Vec.Properties as BaseVecP
+import LinearAlgebra.Matrix.Lemmas as Lemmas
 
 open PE.≡-Reasoning
 
@@ -35,51 +36,59 @@ open import LinearAlgebra.Vec scalar
         ; _+_ ; _*_ ; _·_ )
 
 import LinearAlgebra.Vec.Properties scalar as VecP
+import LinearAlgebra.Transformations.Properties as TransformP
 
 ------------------------------------------------------------------------
+-- Misc. lemmas on transpose and apply
+
+transpose-col : ∀ {n m}
+  → (B : Mat n m) (xs : Vec n)
+  → transpose (zipWith _∷_ xs B) ≡ xs ∷ transpose B
+transpose-col [] [] = PE.refl
+transpose-col (row ∷ B) (x ∷ xs) rewrite transpose-col B xs = PE.refl
+
+transpose-flat : ∀ {n}
+  → (B : Mat n 0)
+  → transpose B ≡ []
+transpose-flat [] = PE.refl
+transpose-flat ([] ∷ B) rewrite transpose-flat B = PE.refl
+
+apply-col : ∀ {n m}
+  → (x : S) (v : Vec m) (C : Vec n) (A : Mat n m)
+  → apply (zipWith _∷_ C A) (x ∷ v) ≡ (x * C) + apply A v
+apply-col x v [] [] = PE.refl
+apply-col x v (_ ∷ C) (_ ∷ A) rewrite apply-col x v C A = PE.refl
+
 ------------------------------------------------------------------------
+-- Properties of `transpose`
+
+-- Transposing twice yeilds the original matrix
+
+transpose-transpose : ∀ {n m}
+  → (A : Mat n m)
+  → transpose (transpose A) ≡ A
+transpose-transpose {n} = main ∘ cw-view
+  where
+    open import LinearAlgebra.Matrix.Column-wise scalar
+    main : ∀ {m}
+      → {B : Mat n m} (cw : Column-wise B)
+      → transpose (transpose B) ≡ B
+    main []cw rewrite
+      transpose-flat {n} (replicate []) = PE.refl
+    main (_∷cw_ {A = B} xs cw) rewrite
+      transpose-col B xs | main cw = PE.refl
+
+-- Applying the transposed matrix is the linear combination of the rows
+
+apply-transpose : ∀ {n m}
+  → (A : Mat n m)
+  → apply (transpose A) ≗ flip combine A
+apply-transpose [] [] = BaseVecP.map-replicate ([] ·_) _ _
+apply-transpose (C ∷ A) (x ∷ v) rewrite
+  apply-col x v C (transpose A) | apply-transpose A v = PE.refl
+
 ------------------------------------------------------------------------
--- Lemmas
-
-private
-  map-on₂ : ∀ {n} {a b c d}
-    {A : Set a} {B : Set b} {C : Set c} {D : Set d}
-    (f : A → B) (g : A → C) (_*_ : B → C → D) (l : BaseVec A n)
-    → map (λ x → f x * g x) l ≡ zipWith _*_ (map f l) (map g l)
-  map-on₂ f g _*_ [] = PE.refl
-  map-on₂ f g _*_ (x ∷ l) = PE.cong (_ ∷_) $ map-on₂ f g _*_ l
-
-  tabulate-cong : ∀ {n} {a} {A : Set a}
-    (f g : Fin n → A)
-    → f ≗ g
-    → tabulate f ≡ tabulate g
-  tabulate-cong {0}     f g f=g = PE.refl
-  tabulate-cong {suc n} f g f=g = PE.cong₂ _∷_ (f=g zero) (tabulate-cong _ _ (f=g ∘ suc))
-
-------------------------------------------------------------------------
-------------------------------------------------------------------------
-------------------------------------------------------------------------
-
-module _ {n m} where
-
-  open import LinearAlgebra.Transformations
-    (VecP.vectorSpaceOver m)
-    (VecP.vectorSpaceOver n)
-
-  -- Applying a matrix is a linear operation
-
-  apply-isLinear : ∀ (A : Mat n m) → IsLinearFn (apply A)
-  apply-isLinear A = record
-    { scale = λ k v → begin
-        apply A (k * v)                   ≡⟨⟩
-        map ((k * v) ·_) A                ≡⟨ BaseVecP.map-cong (VecP.·-assoc k v) A ⟩
-        map ((k s*_) ∘ (v ·_)) A          ≡⟨ BaseVecP.map-∘ (k s*_) (v ·_) A ⟩
-        k * apply A v ∎
-    ; sum = λ v u → begin
-        apply A (v + u)                   ≡⟨⟩
-        map ((v + u) ·_) A                ≡⟨ BaseVecP.map-cong (λ w → VecP.·-distribʳ w v u) A ⟩
-        map (λ w → (v · w) s+ (u · w)) A  ≡⟨ map-on₂ (v ·_) (u ·_) _s+_ A ⟩
-        apply A v + apply A u ∎ }
+-- Properties of specific matrices
 
 -- The zero matrix is a constant transformation
 
@@ -96,7 +105,70 @@ m1-identity : ∀ n → apply (m1 {n}) ≗ id
 m1-identity n v = begin
   apply m1 v                        ≡⟨⟩
   map (v ·_) (tabulate essential)   ≡⟨ PE.sym $ BaseVecP.tabulate-∘ (v ·_) essential ⟩
-  tabulate (λ i → v · essential i)  ≡⟨ tabulate-cong _ (flip lookup v)
+  tabulate (λ i → v · essential i)  ≡⟨ Lemmas.tabulate-cong _ (flip lookup v)
                                         $ flip VecP.essential-lookup v ⟩
   tabulate (flip lookup v)          ≡⟨ BaseVecP.tabulate∘lookup v ⟩
   v ∎
+
+-- the identity is an identity with an additional column and row:
+--      [ 1 0 … 0 ]   [ 1 0 0  ]
+-- id = | 0 1 … 0 | = [ 0 ⋱ ⋮  |
+--      [ 0 0 … 1 ]   [ 0 … id ]
+m1-column-row : ∀ k → m1 ≡ essential zero ∷ zipWith _∷_ v0 (m1 {k})
+m1-column-row k rewrite
+  BaseVecP.tabulate-∘ (s0 ∷_) (essential {k})
+  | Lemmas.zipWith-const₁ _∷_ s0 (m1 {k})
+  = PE.refl
+
+-- Transposing the identity matrix yeilds the identity matrix
+
+transpose-m1 : ∀ n → transpose m1 ≡ m1 {n}
+transpose-m1 0 = PE.refl
+transpose-m1 (suc n) = begin
+  transpose m1                         ≡⟨ PE.cong transpose (m1-column-row n) ⟩
+  transpose (e0 ∷ zipWith _∷_ v0 m1)   ≡⟨ PE.cong (zipWith _∷_ e0) (transpose-col m1 v0) ⟩
+  zipWith _∷_ e0 (v0 ∷ transpose m1)   ≡⟨ PE.cong (zipWith _∷_ e0 ∘ (v0 ∷_)) (transpose-m1 n) ⟩
+  zipWith _∷_ e0 (v0 ∷ m1)             ≡⟨ PE.sym (m1-column-row n) ⟩
+  m1 ∎
+  where
+    e0 = essential zero
+
+module _ {n m : ℕ} where
+  private
+    space₁ = VecP.vectorSpaceOver m
+    space₂ = VecP.vectorSpaceOver n
+
+  open import LinearAlgebra.Transformations space₁ space₂
+    using (IsLinearFn)
+
+  open TransformP.Two space₁ space₂
+    using (combine-linear)
+
+  -- Applying a matrix is a linear transformation
+
+  apply-isLinear : ∀ A → IsLinearFn (apply A)
+  apply-isLinear A = record
+    { scale = λ k v → begin
+        apply A (k * v)                   ≡⟨⟩
+        map ((k * v) ·_) A                ≡⟨ BaseVecP.map-cong (VecP.·-assoc k v) A ⟩
+        map ((k s*_) ∘ (v ·_)) A          ≡⟨ BaseVecP.map-∘ (k s*_) (v ·_) A ⟩
+        k * apply A v ∎
+    ; sum = λ v u → begin
+        apply A (v + u)                   ≡⟨⟩
+        map ((v + u) ·_) A                ≡⟨ BaseVecP.map-cong (λ w → VecP.·-distribʳ w v u) A ⟩
+        map (λ w → (v · w) s+ (u · w)) A  ≡⟨ Lemmas.map-on₂ (v ·_) (u ·_) _s+_ A ⟩
+        apply A v + apply A u ∎ }
+
+
+  -- Unapplying a linear transformation is equivalent to the transformation
+
+  apply-unapply : ∀ T
+    → IsLinearFn T
+    → apply (unapply T) ≗ T
+  apply-unapply T T-lin v = begin
+    apply (unapply T) v         ≡⟨ apply-transpose (map T m1) v ⟩
+    combine v (map T m1)        ≡⟨ PE.sym (combine-linear T T-lin v m1) ⟩
+    T (combine v m1)            ≡⟨ PE.cong T (PE.sym (apply-transpose m1 v)) ⟩
+    T (apply (transpose m1) v)  ≡⟨ PE.cong (λ x → T (apply x v)) (transpose-m1 _) ⟩
+    T (apply m1 v)              ≡⟨ PE.cong T (m1-identity _ v) ⟩
+    T v ∎
