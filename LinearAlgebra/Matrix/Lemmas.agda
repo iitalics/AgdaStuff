@@ -6,7 +6,7 @@ open import Relation.Binary.PropositionalEquality as PE using (_≡_; _≗_)
 open import Data.Nat using (ℕ; suc)
 open import Data.Fin using (Fin; suc; zero)
 open import Data.Vec
-  using ( _∷_; []; map; replicate; zipWith; tabulate)
+  using ( _∷_; []; foldr; map; replicate; zipWith; tabulate)
   renaming (Vec to BaseVec)
 
 module LinearAlgebra.Matrix.Lemmas where
@@ -35,3 +35,12 @@ zipWith-const₁ : ∀ {n} {a b c} {A : Set a} {B : Set b} {C : Set c}
   → map (k *_) l ≡ zipWith _*_ (replicate k) l
 zipWith-const₁ _*_ k [] = PE.refl
 zipWith-const₁ _*_ k (x ∷ l) = PE.cong ((k * x) ∷_) (zipWith-const₁ _*_ k l)
+
+foldr-replicate : ∀ {a b} {A : Set a} {B : Set b}
+  → (_+_ : A → B → B) (i : B) (x : A)
+  → (x + i ≡ i)
+  → ∀ n → foldr _ _+_ i (replicate {n = n} x) ≡ i
+foldr-replicate _+_ i x prop 0 = PE.refl
+foldr-replicate _+_ i x prop (suc n) rewrite
+  foldr-replicate _+_ i x prop n
+  = prop
