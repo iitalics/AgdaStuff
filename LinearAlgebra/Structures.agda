@@ -45,7 +45,7 @@ record IsVectorSpace
   v - u = v + negate u
 
   field
-    +-isGroup : IsGroup _≡_ _+_ v0 negate
+    +-isAbelianGroup : IsAbelianGroup _≡_ _+_ v0 negate
     *-identityˡ : ∀ u → s1 * u ≡ u
     *-assoc : ∀ j k v → (j s* k) * v ≡ j * (k * v)
     distribˡ : ∀ k v u → k * (v + u) ≡ (k * v) + (k * u)
@@ -53,11 +53,14 @@ record IsVectorSpace
     zeroˡ : ∀ u → s0 * u ≡ v0
     zeroʳ : ∀ k → k * v0 ≡ v0
 
-  open IsGroup +-isGroup public
+  open IsAbelianGroup +-isAbelianGroup public
     using ()
     renaming ( assoc to +-assoc
              ; identity to +-identity
-             ; inverse to +-inverse )
+             ; inverse to +-inverse
+             ; isMonoid to +-isMonoid
+             ; isCommutativeMonoid to +-isCommutativeMonoid
+             ; isGroup to +-isGroup )
 
   cancels→zero : ∀ w
     → (w + w ≡ w)

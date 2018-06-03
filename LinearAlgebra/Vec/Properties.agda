@@ -24,6 +24,7 @@ module LinearAlgebra.Vec.Properties
 
   open import LinearAlgebra.Vec scalar
 
+
   open Scalar scalar
     using ()
     renaming ( Carrier to S
@@ -32,6 +33,7 @@ module LinearAlgebra.Vec.Properties
              ; _*_ to _s*_
              ; +-identity to s+-identity
              ; +-assoc to s+-assoc
+             ; +-comm to s+-comm
              ; +-isCommutativeMonoid to s+-isComMonoid
              ; *-identity to s*-identity
              ; *-assoc to s*-assoc
@@ -59,6 +61,10 @@ module LinearAlgebra.Vec.Properties
   +-inverseˡ (x ∷ xs) = PE.cong₂ _∷_ (proj₁ s-1*-inverse x) (+-inverseˡ xs)
   +-inverseʳ [] = PE.refl
   +-inverseʳ (x ∷ xs) = PE.cong₂ _∷_ (proj₂ s-1*-inverse x) (+-inverseʳ xs)
+
+  +-comm : ∀ {n} → Commutative _≡_ (_+_ {n})
+  +-comm [] [] = PE.refl
+  +-comm (x ∷ xs) (y ∷ ys) = PE.cong₂ _∷_ (s+-comm x y) (+-comm xs ys)
 
   -- Properties of scalar _*_
 
@@ -169,9 +175,14 @@ module LinearAlgebra.Vec.Properties
       ; inverse = +-inverseˡ , +-inverseʳ
       ; ⁻¹-cong = PE.cong _ }
 
+    +-isAbelianGroup : IsAbelianGroup _≡_ _+_ v0 negate
+    +-isAbelianGroup = record
+      { isGroup = +-isGroup
+      ; comm = +-comm }
+
     isVectorSpace : IsVectorSpace scalar _+_ v0 _*_
     isVectorSpace = record
-      { +-isGroup = +-isGroup
+      { +-isAbelianGroup = +-isAbelianGroup
       ; *-identityˡ = *-identityˡ
       ; *-assoc = *-assoc
       ; distribˡ = distribˡ
