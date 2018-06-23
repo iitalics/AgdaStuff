@@ -26,18 +26,19 @@ instance
 Container : ∀ {a t} (τ : Pred (Set a) t) (ℓ : Lv.Level) → Set (Lv.suc (ℓ ⊔ a) ⊔ t)
 Container τ ℓ = ∀ {A} → (A ∈ τ) → Set ℓ
 
-Get Put Modify : ∀ {c a t} (τ : Pred (Set a) t) (C : Container τ c) → Set _
+Get Put Modify Focus : ∀ {c a t} (τ : Pred (Set a) t) (C : Container τ c) → Set _
 Get τ C = ∀ {A} {{pA : A ∈ τ}} → C pA → A
 Put τ C = ∀ {A B} {{pA : A ∈ τ}} {{pB : B ∈ τ}} → C pA → B → C pB
 Modify τ C = ∀ {A B} {{pA : A ∈ τ}} {{pB : B ∈ τ}} → C pA → (A → B) → C pB
+Focus τ C = ∀ {A} {{pA : A ∈ τ}} → C pA → (A × (∀ {B} {{pB : B ∈ τ}} → B → C pB))
 
 record IsFunctionalUpdate
-  {c a t}
+  {a t}
   (τ : Pred (Set a) t)
-  (C : Container τ c)
+  (C : Container τ a)
   (get : Get τ C)
   (put : Put τ C)
-  : Set (c ⊔ t ⊔ Lv.suc a) where
+  : Set (t ⊔ Lv.suc a) where
   field
     put-get : ∀ {A B} {{pA : A ∈ τ}} {{pB : B ∈ τ}} (ca : C pA) (b : B)
       → get (put ca b) ≡ b
@@ -60,6 +61,25 @@ record IsFunctionalUpdate
       modify (modify cx f) g       ≡⟨ PE.cong (put put/f ∘ g) (put-get cx (f _)) ⟩
       put put/f (g (f (get cx)))   ≡⟨ put-put cx (f _) (g _) ⟩
       modify cx (g ∘ f)             ∎
+
+--
+
+record IsFunctionalFocus
+  {a t}
+  (τ : Pred (Set a) t)
+  (C : Container τ a)
+  (focus : Focus τ C)
+  : Set (t ⊔ Lv.suc a) where
+
+  get : Get τ C
+  get ca = fst (focus ca)
+  put : Put τ C
+  put ca b = snd (focus ca) b
+
+  field
+    isFnUpdate : IsFunctionalUpdate τ C get put
+
+  open IsFunctionalUpdate isFnUpdate public
 
 -------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------
@@ -92,6 +112,20 @@ record IsLens
     isFnUpdate : ∀ {τ : Pred (Set a) t} {C : Container τ a} (l : L τ C)
       → IsFunctionalUpdate τ C (get l) (put l)
 
+  focus : ∀
+    {τ : Pred (Set a) t}
+    {C : Container τ a}
+    → L τ C → Focus τ C
+  focus l ca = (get l ca , put l ca)
+
+  makeLensFromFocus : ∀
+    {τ : Pred (Set a) t}
+    {C : Container τ a}
+    → (foc : Focus τ C)
+    → IsFunctionalFocus τ C foc
+    → L τ C
+  makeLensFromFocus foc isFunFoc = makeLens FF.get FF.put FF.isFnUpdate
+    where module FF = IsFunctionalFocus isFunFoc
   thrush : ∀
     {τ σ : Pred (Set a) t}
     {C : Container τ a}
@@ -114,35 +148,21 @@ record IsLens
       in cdb)
     (record
       { put-get = λ {{pA}} {{pB}} cda b →
-        let
-          instance pDA = pD pA ; pDB = pD pB
-          get1a = get l1 {{pD pA}}
-          get1b = get l1 {{pD pB}}
-          get2a = get l2 {{pA}}
-          get2b = get l2 {{pB}}
-          put1 = put l1 {{pD pA}} {{pD pB}}
-          put2 = put l2 {{pA}} {{pB}}
-        in
+        let instance pDA = pD pA ; pDB = pD pB in
         begin
-          get2b (get1b (put1 cda (put2 (get1a cda) b)))
-            ≡⟨ PE.cong get2b (FU1.put-get cda _) ⟩
-          get2b (put2 (get1a cda) b)
-            ≡⟨ FU2.put-get (get1a cda) b ⟩
+          get l2 (get l1 (put l1 cda (put l2 (get l1 cda) b)))
+            ≡⟨ PE.cong (get l2) (FU1.put-get cda _) ⟩
+          get l2 (put l2 (get l1 cda) b)
+            ≡⟨ FU2.put-get (get l1 cda) b ⟩
           b
             ∎
 
       ; get-put = λ {{pA}} ca →
-        let
-          instance pDA = pD pA
-          put1 = put l1 {{pD pA}} {{pD pA}}
-          put2 = put l2 {{pA}} {{pA}}
-          get1 = get l1
-          get2 = get l2
-        in
+        let instance pDA = pD pA in
         begin
-          put1 ca (put2 (get1 ca) (get2 (get1 ca)))
-            ≡⟨ PE.cong (put1 ca) (FU2.get-put (get1 ca)) ⟩
-          put1 ca (get1 ca)
+          put l1 ca (put l2 (get l1 ca) (get l2 (get l1 ca)))
+            ≡⟨ PE.cong (put l1 ca) (FU2.get-put (get l1 ca)) ⟩
+          put l1 ca (get l1 ca)
             ≡⟨ FU1.get-put ca ⟩
           ca
             ∎
