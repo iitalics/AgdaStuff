@@ -126,6 +126,28 @@ record IsLens
     → L τ C
   makeLensFromFocus foc isFunFoc = makeLens FF.get FF.put FF.isFnUpdate
     where module FF = IsFunctionalFocus isFunFoc
+
+  thrush′ : ∀
+    {τ σ : Pred (Set a) t}
+    {C : Container τ a}
+    {D : Container σ a}
+    (pD : ∀ {A} (pA : A ∈ σ) → D pA ∈ τ)
+    → L τ C
+    → L σ D
+    → L σ (C ∘ pD)
+  thrush′ {τ} {σ} {C} {D} pD l1 l2 =
+    makeLensFromFocus foc12
+      (record
+        { isFnUpdate = {!!} })
+    where
+      foc12 : Focus σ (C ∘ pD)
+      foc12 cda =
+        let
+          (da , f1) = focus l1 {{pD _}} cda
+          (a  , f2) = focus l2 da
+        in
+        a , (f1 {{pD _}} ∘ f2)
+
   thrush : ∀
     {τ σ : Pred (Set a) t}
     {C : Container τ a}
